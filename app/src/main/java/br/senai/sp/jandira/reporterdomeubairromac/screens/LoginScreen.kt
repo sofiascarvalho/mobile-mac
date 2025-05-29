@@ -38,7 +38,9 @@ import br.senai.sp.jandira.reporterdomeubairromac.R
 import br.senai.sp.jandira.reporterdomeubairromac.LoginRequest
 import br.senai.sp.jandira.reporterdomeubairromac.model.User
 import br.senai.sp.jandira.reporterdomeubairromac.services.RetrofitFactory
+import retrofit2.Call
 import retrofit2.Callback
+import retrofit2.Response
 
 @Composable
 fun LoginScreen(navegacao: NavHostController?) {
@@ -102,7 +104,7 @@ fun LoginScreen(navegacao: NavHostController?) {
                     shape = RoundedCornerShape(8.dp),
                     modifier = Modifier
                         .padding(start = 20.dp, end = 20.dp)
-                        .height(45.dp)
+                        .height(60.dp)
                         .width(322.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color(0xffffffff),
@@ -119,7 +121,7 @@ fun LoginScreen(navegacao: NavHostController?) {
                     shape = RoundedCornerShape(8.dp),
                     modifier = Modifier
                         .padding(start = 20.dp, end = 20.dp, top = 28.dp)
-                        .height(45.dp)
+                        .height(60.dp)
                         .width(322.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color(0xffffffff),
@@ -144,16 +146,19 @@ fun LoginScreen(navegacao: NavHostController?) {
 
                     call.enqueue(object : Callback<User> {
                         override fun onResponse(call: retrofit2.Call<User>, response: retrofit2.Response<User>) {
-                            if (response.isSuccessful ) {
+                            if (response.isSuccessful && response.body() != null) {
+                                val usuario = response.body()!!
+                                Log.i("LOGIN", "Usuário logado: ${usuario.nome}")
                                 navegacao?.navigate("feed")
                             } else {
-                                Log.e("API", "Erro ao fazer login!: ${response.code()}")
+                                Log.e("LOGIN", "Erro ao fazer login! Código: ${response.code()}")
+                                Log.e("LOGIN", "Mensagem: ${response.errorBody()?.string()}")
                             }
                         }
-
-                        override fun onFailure(call: retrofit2.Call<User>, t: Throwable) {
-                            Log.e("API", "Falha na requisição: ${t.message}")
+                        override fun onFailure(call: Call<User>, t: Throwable) {
+                            Log.e("LOGIN", "Falha na requisição: ${t.localizedMessage}", t)
                         }
+
                     })
                 },
                     colors = ButtonDefaults.buttonColors(
