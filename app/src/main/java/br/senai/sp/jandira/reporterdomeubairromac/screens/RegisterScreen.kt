@@ -96,9 +96,7 @@ fun RegisterScreen(navegacao: NavHostController?) {
                             email = emailState.value,
                             senha = senhaState.value
                         )
-                        val call= RetrofitFactory()
-                            .getUserService()
-                            .registerUser(user)
+                        val call= RetrofitFactory.userService.registerUser(user)
 
                         call.enqueue(object : Callback<UserRequest> {
                             override fun onResponse(call: retrofit2.Call<UserRequest>, response: retrofit2.Response<UserRequest>) {

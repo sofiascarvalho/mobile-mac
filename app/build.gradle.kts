@@ -27,6 +27,11 @@ android {
             )
         }
     }
+
+    composeOptions{
+        kotlinCompilerExtensionVersion = "1.5.10"
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -71,4 +76,9 @@ dependencies {
 
     //coil
     implementation("io.coil-kt:coil-compose:2.7.0")
+
+
+    implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
+    implementation ("androidx.activity:activity-compose:1.8.2")
 }

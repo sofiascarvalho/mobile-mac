@@ -1,10 +1,9 @@
 package br.senai.sp.jandira.reporterdomeubairromac.services
 
 
-import br.senai.sp.jandira.reporterdomeubairromac.LoginRequest
+import br.senai.sp.jandira.reporterdomeubairromac.model.LoginRequest
 import br.senai.sp.jandira.reporterdomeubairromac.model.User
 import br.senai.sp.jandira.reporterdomeubairromac.model.UserRequest
-import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.Headers
 import retrofit2.http.POST

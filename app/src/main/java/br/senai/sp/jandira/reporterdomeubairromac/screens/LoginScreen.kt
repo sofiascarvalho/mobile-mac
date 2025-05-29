@@ -35,12 +35,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import br.senai.sp.jandira.reporterdomeubairromac.R
-import br.senai.sp.jandira.reporterdomeubairromac.LoginRequest
+import br.senai.sp.jandira.reporterdomeubairromac.model.LoginRequest
 import br.senai.sp.jandira.reporterdomeubairromac.model.User
 import br.senai.sp.jandira.reporterdomeubairromac.services.RetrofitFactory
 import retrofit2.Call
 import retrofit2.Callback
-import retrofit2.Response
 
 @Composable
 fun LoginScreen(navegacao: NavHostController?) {
@@ -140,9 +139,7 @@ fun LoginScreen(navegacao: NavHostController?) {
                         senha = senhaState.value
                     )
 
-                    val call = RetrofitFactory()
-                        .getUserService()
-                        .loginUser(loginData)
+                    val call = RetrofitFactory.userService.loginUser(loginData)
 
                     call.enqueue(object : Callback<User> {
                         override fun onResponse(call: retrofit2.Call<User>, response: retrofit2.Response<User>) {

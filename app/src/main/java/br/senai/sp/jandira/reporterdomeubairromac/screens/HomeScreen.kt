@@ -63,7 +63,10 @@ fun HomeScreen(navegacao: NavHostController?) {
                     horizontalArrangement = Arrangement.Center
                 ){
                     Icon(
-                        imageVector = Icons.Default.AddCircle, contentDescription = "Fazer ocorrência"
+                        imageVector = Icons.Default.AddCircle, contentDescription = "Fazer ocorrência",
+                        modifier = Modifier.clickable {
+                            navegacao?.navigate("occurrence")
+                        }
                     )
 
                     OutlinedTextField(
