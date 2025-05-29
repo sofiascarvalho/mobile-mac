@@ -2,6 +2,7 @@ package br.senai.sp.jandira.reporterdomeubairromac.screens
 
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -25,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -38,6 +40,11 @@ import br.senai.sp.jandira.reporterdomeubairromac.viewmodel.PostViewModel
 fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = viewModel()) {
     val posts by viewModel.posts
     val conteudo by viewModel.conteudo
+
+    var idCategoria by remember { mutableStateOf("") }
+    var idUsuario by remember { mutableStateOf("") }
+    var idStatus by remember { mutableStateOf("") }
+    val context = LocalContext.current
 
     val options = listOf("Assalto", "Incêndio", "Acidente", "Obra irregular")
     var expanded by remember { mutableStateOf(false) }
@@ -246,14 +253,22 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
 
 
                 Button(
-                    onClick = { viewModel.publicar() },
+                    onClick = {
+                        viewModel.publicar(
+                            categoriaSelecionada = selectedOption,
+                            onSuccess = {
+                                Toast.makeText(context, "Ocorrência enviada com sucesso!", Toast.LENGTH_SHORT).show()
+                                navegacao?.navigate("feed")
+                            },
+                            onError = { msg ->
+                                Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+                            }
+                        ) },
                     modifier = Modifier.align(Alignment.End),
                     shape = RoundedCornerShape(5.dp),
                     colors = ButtonDefaults.buttonColors(Color(0xffc1121f))
                 ) {
-                    Text("Enviar", modifier = Modifier.clickable {
-                        navegacao?.navigate("feed")
-                    })
+                    Text("Enviar")
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))

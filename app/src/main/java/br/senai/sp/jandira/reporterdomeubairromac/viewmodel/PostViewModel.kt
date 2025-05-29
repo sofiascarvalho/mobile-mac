@@ -33,18 +33,42 @@ class PostViewModel : ViewModel() {
         }
     }
 
-    fun publicar() {
-        val texto = conteudo.value.trim()
-        if (texto.isBlank()) return
+    fun publicar(
+        categoriaSelecionada:String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ){
+        val texto =conteudo.value.trim()
+        if (texto.isBlank()){
+            onError("Descrição vazia!")
+            return
+        }
+
+        val categoriaMap = mapOf(
+            "Assalto" to 1,
+            "Incêndio" to 2,
+            "Acidente" to 3,
+            "Assalto" to 4
+        )
+
+        val idCategoria = categoriaMap[categoriaSelecionada] ?:1
+
+        val request = PostRequest(
+            descricao = texto,
+            id_categoria = idCategoria,
+            id_usuario = 1,
+            id_status = 1
+        )
 
         viewModelScope.launch {
             try {
-                publicationService.createOccurrence(PostRequest(texto))
-                conteudo.value = ""
+                val response = publicationService.createOccurrence(request)
+                conteudo.value=""
                 carregarPosts()
-            } catch (e: Exception) {
-                // lidar com erro
+                onSuccess()
+            }catch (e: Exception) {
                 e.printStackTrace()
+                onError("Erro ao publicar: ${e.message}")
             }
         }
     }
