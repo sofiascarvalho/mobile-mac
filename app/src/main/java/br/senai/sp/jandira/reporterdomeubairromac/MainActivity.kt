@@ -17,6 +17,7 @@ import androidx.navigation.compose.rememberNavController
 import br.senai.sp.jandira.reporterdomeubairromac.screens.HomeScreen
 import br.senai.sp.jandira.reporterdomeubairromac.screens.LoginScreen
 import br.senai.sp.jandira.reporterdomeubairromac.screens.OccurrenceScreen
+import br.senai.sp.jandira.reporterdomeubairromac.screens.OptionsScreen
 import br.senai.sp.jandira.reporterdomeubairromac.screens.ProfileScreen
 import br.senai.sp.jandira.reporterdomeubairromac.screens.RegisterScreen
 import br.senai.sp.jandira.reporterdomeubairromac.ui.theme.ReporterDoMeuBairroMacTheme
@@ -36,7 +37,9 @@ class MainActivity : ComponentActivity() {
                     composable(route = "login") { LoginScreen(navegacao) }
                     composable(route = "feed") { HomeScreen(navegacao) }
                     composable(route = "profile"){ ProfileScreen(navegacao) }
+                    composable(route = "options"){ OptionsScreen(navegacao) }
                     composable(route = "occurrence"){ OccurrenceScreen(navegacao) }
+
                 }
             }
         }
