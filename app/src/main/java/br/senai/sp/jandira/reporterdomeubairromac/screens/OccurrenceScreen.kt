@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.currentComposer
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,26 +40,19 @@ import kotlin.math.log
 
 @Composable
 fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = viewModel()) {
-    val posts by viewModel.posts
+    val categorias by viewModel.categorias
     val conteudo by viewModel.conteudo
 
     var titulo by remember { mutableStateOf("") }
-    var logradouro by remember { mutableStateOf("") }
-    var bairro by remember { mutableStateOf("") }
-    var cidade by remember { mutableStateOf("") }
-    var estado by remember { mutableStateOf("") }
-    var cep by remember { mutableStateOf("") }
-
-    var idCategoria by remember { mutableStateOf("") }
-    var idUsuario by remember { mutableStateOf("") }
-    var idStatus by remember { mutableStateOf("") }
-    val context = LocalContext.current
-
-    val options = listOf("Assalto", "Incêndio", "Acidente", "Obra irregular")
     var expanded by remember { mutableStateOf(false) }
     var selectedOption by remember { mutableStateOf("") }
 
     var selectedImages by remember { mutableStateOf<List<Uri>>(emptyList()) }
+    val context = LocalContext.current
+
+    val options = listOf("Assalto", "Incêndio", "Acidente", "Obra irregular")
+
+
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetMultipleContents()
@@ -66,6 +60,12 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
         selectedImages = uris
         uris.forEach{ Log.d("Imagem Selecionada", it.toString())}
     }
+
+    LaunchedEffect(Unit) {
+        viewModel.carregarCategorias()
+    }
+
+    Text(text = "Categoria", color = Color.White)
 
     Box(modifier = Modifier.fillMaxSize()){
 
@@ -156,7 +156,9 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
                 OutlinedTextField(
                     value = conteudo,
                     onValueChange = { viewModel.conteudo.value = it },
-                    modifier = Modifier.fillMaxWidth().height(160.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(160.dp),
                     shape = RoundedCornerShape(8.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color.White,
@@ -188,7 +190,9 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
                         value = "",
                         onValueChange = {},
                         label = { Text(text = "Bairro") },
-                        modifier = Modifier.padding(end = 13.dp).width(170.dp),
+                        modifier = Modifier
+                            .padding(end = 13.dp)
+                            .width(170.dp),
                         shape = RoundedCornerShape(8.dp),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = Color.White,
@@ -218,7 +222,9 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
                         value = "",
                         onValueChange = {},
                         label = { Text(text = "Estado") },
-                        modifier = Modifier.padding(end = 13.dp).width(170.dp),
+                        modifier = Modifier
+                            .padding(end = 13.dp)
+                            .width(170.dp),
                         shape = RoundedCornerShape(8.dp),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = Color.White,
@@ -267,6 +273,8 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
                             categoriaSelecionada = selectedOption,
                             imagensUri = selectedImages,
                             context = context,
+                            idUsuario = 1, // ✅ Coloque o ID real do usuário logado
+                            idEndereco = 1, // ✅ Coloque o ID do endereço (se for automático, integre com o backend)
                             onSuccess = {
                                 Toast.makeText(context, "Ocorrência enviada com sucesso!", Toast.LENGTH_SHORT).show()
                                 navegacao?.navigate("feed")

@@ -1,5 +1,7 @@
 package br.senai.sp.jandira.reporterdomeubairromac.services
 
+import br.senai.sp.jandira.reporterdomeubairromac.model.Categoria
+import br.senai.sp.jandira.reporterdomeubairromac.model.CategoriaRespose
 import br.senai.sp.jandira.reporterdomeubairromac.model.Post
 import br.senai.sp.jandira.reporterdomeubairromac.model.PostRequest
 import br.senai.sp.jandira.reporterdomeubairromac.model.ResponsePadrao
@@ -17,10 +19,13 @@ interface PublicationService {
     @POST("ocorrencias")
     suspend fun enviarOcorrencia(
         @Body ocorrencia: Map<String, @JvmSuppressWildcards Any>
-    ): Response<ResponsePadrao>
+    ): Response<Post>
 
     @POST("midias")
     suspend fun enviarMidia(
         @Body midia: Map<String, @JvmSuppressWildcards Any>
     ): Response<ResponsePadrao>
+
+    @GET("categorias") // ou o endpoint correto
+    suspend fun getCategorias(): Response<CategoriaRespose>
 }
