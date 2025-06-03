@@ -23,6 +23,9 @@ import androidx.navigation.NavHostController
 
 import androidx.compose.ui.platform.LocalContext
 import android.util.Log
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import br.senai.sp.jandira.reporterdomeubairromac.R
 import br.senai.sp.jandira.reporterdomeubairromac.model.UserRequest
 import br.senai.sp.jandira.reporterdomeubairromac.services.RetrofitFactory
@@ -162,6 +165,10 @@ fun CustomTextFieldRegister(
             .padding(horizontal = 20.dp, vertical = 14.dp)
             .height(60.dp)
             .width(322.dp),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Text,
+            imeAction = ImeAction.Next
+        ),
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = Color.White,
             unfocusedBorderColor = Color.White,

@@ -171,7 +171,7 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
                     onValueChange = { viewModel.conteudo.value = it },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(160.dp),
+                        .height(140.dp),
                     shape = RoundedCornerShape(8.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color.White,
@@ -270,7 +270,7 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
                     Text(text = uri.lastPathSegment ?: "Imagem selecionada")
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
 
                 if (showCepDialog) {
@@ -281,7 +281,7 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
                                 if (cep.length == 8 && cep.all { it.isDigit() }) {
                                     coroutineScope.launch {
                                         try {
-                                            val endereco = RetrofitViaCep.service.buscarEndereco("01001000")
+                                            val endereco = RetrofitViaCep.service.buscarEndereco(cep)
                                             Log.d("TESTE_CEP", endereco.logradouro ?: "sem logradouro")
                                             logradouro = endereco.logradouro ?: ""
                                             bairro = endereco.bairro ?: ""
