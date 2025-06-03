@@ -11,9 +11,9 @@ import retrofit2.http.POST
 interface UserService {
     @Headers("Content-Type: application/json")
     @POST("usuario")
-    fun registerUser(@Body user: UserRequest): retrofit2.Call<UserRequest>
+    suspend fun registerUser(@Body user: UserRequest): retrofit2.Response<UserRequest>
 
     @POST("login")
-    fun loginUser(@Body loginRequest: LoginRequest): retrofit2.Call<User>
+    suspend fun loginUser(@Body loginRequest: LoginRequest): retrofit2.Response<User>
 
 }

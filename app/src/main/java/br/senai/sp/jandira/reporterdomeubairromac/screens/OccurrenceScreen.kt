@@ -21,6 +21,7 @@ import androidx.compose.runtime.currentComposer
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,11 +36,16 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import br.senai.sp.jandira.reporterdomeubairromac.R
+import br.senai.sp.jandira.reporterdomeubairromac.services.RetrofitViaCep
 import br.senai.sp.jandira.reporterdomeubairromac.viewmodel.PostViewModel
+import kotlinx.coroutines.launch
 import kotlin.math.log
 
 @Composable
 fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = viewModel()) {
+
+    var showCepDialog by remember { mutableStateOf(false) }
+
     val categorias by viewModel.categorias
     val conteudo by viewModel.conteudo
 
@@ -52,6 +58,13 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
 
     val options = listOf("Assalto", "Incêndio", "Acidente", "Obra irregular")
 
+    val coroutineScope = rememberCoroutineScope()
+
+    var cep by remember { mutableStateOf("") }
+    var logradouro by remember { mutableStateOf("") }
+    var bairro by remember { mutableStateOf("") }
+    var cidade by remember { mutableStateOf("") }
+    var estado by remember { mutableStateOf("") }
 
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -172,9 +185,9 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
 
                 Text(text = "Endereço", color = Color.White)
                 OutlinedTextField(
-                    value = "",
-                    onValueChange = {},
-                    label = { Text(text = "Logradouro") },
+                    value = logradouro,
+                    onValueChange = {logradouro = it},
+                    label = { Text("Logradouro") },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     colors = OutlinedTextFieldDefaults.colors(
@@ -187,9 +200,9 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
                 Spacer(modifier = Modifier.height(5.dp))
                 Row{
                     OutlinedTextField(
-                        value = "",
-                        onValueChange = {},
-                        label = { Text(text = "Bairro") },
+                        value = bairro,
+                        onValueChange = {bairro = it},
+                        label = { Text("Bairro") },
                         modifier = Modifier
                             .padding(end = 13.dp)
                             .width(170.dp),
@@ -203,9 +216,9 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     OutlinedTextField(
-                        value = "",
-                        onValueChange = {},
-                        label = { Text(text = "Cidade") },
+                        value = cidade,
+                        onValueChange = {cidade = it},
+                        label = { Text("Cidade") },
                         modifier = Modifier.width(170.dp),
                         shape = RoundedCornerShape(8.dp),
                         colors = OutlinedTextFieldDefaults.colors(
@@ -219,9 +232,9 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
                 Spacer(modifier = Modifier.height(5.dp))
                 Row {
                     OutlinedTextField(
-                        value = "",
-                        onValueChange = {},
-                        label = { Text(text = "Estado") },
+                        value = estado,
+                        onValueChange = {estado = it},
+                        label = { Text("Estado") },
                         modifier = Modifier
                             .padding(end = 13.dp)
                             .width(170.dp),
@@ -233,19 +246,13 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
                             unfocusedTextColor = Color.White
                         )
                     )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    OutlinedTextField(
-                        value = "",
-                        onValueChange = {},
-                        label = { Text(text = "CEP") },
-                        modifier = Modifier.width(170.dp),
-                        shape = RoundedCornerShape(8.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color.White,
-                            unfocusedBorderColor = Color.White,
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White
-                        )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = "Buscar endereço pelo CEP",
+                        color = Color.Cyan,
+                        modifier = Modifier
+                            .padding(top = 10.dp)
+                            .clickable { showCepDialog = true }
                     )
                 }
 
@@ -264,6 +271,52 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
+
+
+                if (showCepDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showCepDialog = false },
+                        confirmButton = {
+                            Button(onClick = {
+                                if (cep.length == 8 && cep.all { it.isDigit() }) {
+                                    coroutineScope.launch {
+                                        try {
+                                            val endereco = RetrofitViaCep.service.buscarEndereco("01001000")
+                                            Log.d("TESTE_CEP", endereco.logradouro ?: "sem logradouro")
+                                            logradouro = endereco.logradouro ?: ""
+                                            bairro = endereco.bairro ?: ""
+                                            cidade = endereco.localidade ?: ""
+                                            estado = endereco.uf ?: ""
+                                            showCepDialog = false
+                                        } catch (e: Exception) {
+                                            Log.e("ViaCEP", "Erro: ${e.message}")
+                                            Toast.makeText(context, "Erro ao buscar CEP", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                } else {
+                                    Toast.makeText(context, "CEP inválido", Toast.LENGTH_SHORT).show()
+                                }
+                            }) {
+                                Text("Buscar")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showCepDialog = false }) {
+                                Text("Cancelar")
+                            }
+                        },
+                        title = { Text("Digite seu CEP") },
+                        text = {
+                            OutlinedTextField(
+                                value = cep,
+                                onValueChange = { cep = it },
+                                label = { Text("CEP") },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    )
+                }
+
 
 
                 Button(
@@ -288,7 +341,10 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
                     shape = RoundedCornerShape(5.dp),
                     colors = ButtonDefaults.buttonColors(Color(0xffc1121f))
                 ) {
-                    Text("Enviar")
+                    Text("Enviar",
+                        modifier = Modifier.clickable {
+                            navegacao?.navigate("feed")
+                        })
                 }
 
 

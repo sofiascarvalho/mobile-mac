@@ -36,9 +36,9 @@ class MainActivity : ComponentActivity() {
                     composable(route = "home") { RegisterScreen(navegacao) }
                     composable(route = "login") { LoginScreen(navegacao) }
                     composable(route = "feed") { HomeScreen(navegacao) }
-                    composable(route = "profile"){ ProfileScreen(navegacao) }
-                    composable(route = "options"){ OptionsScreen(navegacao) }
+                    composable(route = "option"){ OptionsScreen(navegacao) }
                     composable(route = "occurrence"){ OccurrenceScreen(navegacao) }
+                    composable(route = "profile"){ ProfileScreen(navegacao) }
 
                 }
             }

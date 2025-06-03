@@ -15,3 +15,14 @@ object RetrofitFactory {
     val userService: UserService = retrofitFactory.create(UserService::class.java)
     val publicationService: PublicationService =retrofitFactory.create(PublicationService::class.java)
 }
+
+
+object RetrofitViaCep {
+    private val retrofit = Retrofit
+        .Builder()
+        .baseUrl("https://viacep.com.br/ws/")
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+    val service: ViaCepService = retrofit.create(ViaCepService::class.java)
+}

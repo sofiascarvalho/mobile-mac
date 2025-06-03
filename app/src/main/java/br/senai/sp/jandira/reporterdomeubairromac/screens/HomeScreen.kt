@@ -1,6 +1,7 @@
 package br.senai.sp.jandira.reporterdomeubairromac.screens
 
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,7 +20,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
@@ -63,9 +63,14 @@ fun HomeScreen(navegacao: NavHostController?) {
                     horizontalArrangement = Arrangement.Center
                 ){
                     Icon(
-                        imageVector = Icons.Default.AddCircle, contentDescription = "Fazer ocorrência",
-                        modifier = Modifier.clickable {
-                            navegacao?.navigate("occurrence")
+                        imageVector = Icons.Default.AddCircle,
+                        contentDescription = "Fazer ocorrência",
+                        modifier = Modifier
+                            .size(25.dp).clickable {
+                                Log.d("NAV", "Indo para OptionScreen")
+                            navegacao?.navigate("option") {
+                                launchSingleTop = true
+                            }
                         }
                     )
 
@@ -86,7 +91,8 @@ fun HomeScreen(navegacao: NavHostController?) {
                     )
                     Icon(
                         imageVector = Icons.Default.AccountCircle, contentDescription = "Perfil",
-                        modifier = Modifier.clickable {
+                        modifier = Modifier
+                            .size(25.dp).clickable {
                             navegacao?.navigate("profile")
                         }
                     )

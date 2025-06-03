@@ -27,6 +27,8 @@ class PostViewModel : ViewModel() {
 
     var categorias = mutableStateOf<List<Categoria>>(emptyList())
 
+
+
     private fun obterIdCategoria(nome: String): Int {
         return when (nome) {
             "Assalto" -> 1

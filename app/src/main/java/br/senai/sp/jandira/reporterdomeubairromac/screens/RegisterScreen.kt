@@ -26,6 +26,7 @@ import android.util.Log
 import br.senai.sp.jandira.reporterdomeubairromac.R
 import br.senai.sp.jandira.reporterdomeubairromac.model.UserRequest
 import br.senai.sp.jandira.reporterdomeubairromac.services.RetrofitFactory
+import br.senai.sp.jandira.reporterdomeubairromac.viewmodel.RegisterViewModel
 
 
 import retrofit2.Call
@@ -36,7 +37,7 @@ import retrofit2.Response
 fun RegisterScreen(navegacao: NavHostController?) {
 
     val context = LocalContext.current
-
+    val viewModel = remember { RegisterViewModel() }
 
     val nomeState = remember { mutableStateOf("") }
     val emailState = remember { mutableStateOf("") }
@@ -83,9 +84,9 @@ fun RegisterScreen(navegacao: NavHostController?) {
 
                 Spacer(modifier = Modifier.height(130.dp))
 
-                CustomTextField(value = nomeState.value, onValueChange = { nomeState.value = it }, label = "Nome", )
-                CustomTextField(value = emailState.value, onValueChange = { emailState.value = it }, label = "Email")
-                CustomTextField(value = senhaState.value, onValueChange = { senhaState.value = it }, label = "Senha", isPassword = true)
+                CustomTextFieldRegister(value = nomeState.value, onValueChange = { nomeState.value = it }, label = "Nome", )
+                CustomTextFieldRegister(value = emailState.value, onValueChange = { emailState.value = it }, label = "Email")
+                CustomTextFieldRegister(value = senhaState.value, onValueChange = { senhaState.value = it }, label = "Senha", isPassword = true)
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -96,23 +97,18 @@ fun RegisterScreen(navegacao: NavHostController?) {
                             email = emailState.value,
                             senha = senhaState.value
                         )
-                        val call= RetrofitFactory.userService.registerUser(user)
 
-                        call.enqueue(object : Callback<UserRequest> {
-                            override fun onResponse(call: retrofit2.Call<UserRequest>, response: retrofit2.Response<UserRequest>) {
-                                if (response.isSuccessful) {
-                                    Log.i("API", "Usuário cadastrado com sucesso: ${response.body()}")
-                                } else {
-                                    Log.e("API", "Erro ao cadastrar: ${response.code()}")
-                                }
+                        viewModel.cadastrarUsuario(
+                            context = context,
+                            user = user,
+                            onSuccess = {
+                                Toast.makeText(context, "Cadastro realizado com sucesso!", Toast.LENGTH_SHORT).show()
+                                navegacao?.navigate("login")
+                            },
+                            onError = { mensagemErro ->
+                                Toast.makeText(context, mensagemErro, Toast.LENGTH_LONG).show()
                             }
-                            override fun onFailure(call: retrofit2.Call<UserRequest>, t: Throwable) {
-                                Log.e("API", "Falha na requisição: ${t.message}")
-                            }
-
-                        })
-
-                        navegacao!!.navigate("login")
+                        )
                     },
                     colors = ButtonDefaults.buttonColors(Color(0xffc1121f)),
                     modifier = Modifier
@@ -127,6 +123,7 @@ fun RegisterScreen(navegacao: NavHostController?) {
                         fontSize = 18.sp
                     )
                 }
+
 
                 Spacer(modifier = Modifier.height(26.dp))
 
@@ -150,7 +147,12 @@ fun RegisterScreen(navegacao: NavHostController?) {
 }
 
 @Composable
-fun CustomTextField(value: String, onValueChange: (String) -> Unit, label: String, isPassword: Boolean = false) {
+fun CustomTextFieldRegister(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    isPassword: Boolean = false
+) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
