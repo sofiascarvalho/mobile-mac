@@ -35,11 +35,19 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import br.senai.sp.jandira.reporterdomeubairromac.R
 import br.senai.sp.jandira.reporterdomeubairromac.viewmodel.PostViewModel
+import kotlin.math.log
 
 @Composable
 fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = viewModel()) {
     val posts by viewModel.posts
     val conteudo by viewModel.conteudo
+
+    var titulo by remember { mutableStateOf("") }
+    var logradouro by remember { mutableStateOf("") }
+    var bairro by remember { mutableStateOf("") }
+    var cidade by remember { mutableStateOf("") }
+    var estado by remember { mutableStateOf("") }
+    var cep by remember { mutableStateOf("") }
 
     var idCategoria by remember { mutableStateOf("") }
     var idUsuario by remember { mutableStateOf("") }
@@ -90,8 +98,8 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
 
                 Text(text = "Título", color = Color.White)
                 OutlinedTextField(
-                    value = "",
-                    onValueChange = {},
+                    value = titulo,
+                    onValueChange = {titulo=it},
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp),
                     colors = OutlinedTextFieldDefaults.colors(
@@ -255,7 +263,10 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
                 Button(
                     onClick = {
                         viewModel.publicar(
+                            titulo = titulo,
                             categoriaSelecionada = selectedOption,
+                            imagensUri = selectedImages,
+                            context = context,
                             onSuccess = {
                                 Toast.makeText(context, "Ocorrência enviada com sucesso!", Toast.LENGTH_SHORT).show()
                                 navegacao?.navigate("feed")
@@ -263,13 +274,15 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
                             onError = { msg ->
                                 Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
                             }
-                        ) },
+                        )
+                    },
                     modifier = Modifier.align(Alignment.End),
                     shape = RoundedCornerShape(5.dp),
                     colors = ButtonDefaults.buttonColors(Color(0xffc1121f))
                 ) {
                     Text("Enviar")
                 }
+
 
                 Spacer(modifier = Modifier.height(16.dp))
             }
