@@ -9,55 +9,40 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.currentComposer
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import br.senai.sp.jandira.reporterdomeubairromac.R
+import br.senai.sp.jandira.reporterdomeubairromac.components.CategoriaSelectBox
+import br.senai.sp.jandira.reporterdomeubairromac.model.Categoria
 import br.senai.sp.jandira.reporterdomeubairromac.services.RetrofitViaCep
 import br.senai.sp.jandira.reporterdomeubairromac.viewmodel.PostViewModel
 import kotlinx.coroutines.launch
-import kotlin.math.log
 
 @Composable
 fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = viewModel()) {
 
     var showCepDialog by remember { mutableStateOf(false) }
-
     val categorias by viewModel.categorias
     val conteudo by viewModel.conteudo
 
-    var titulo by remember { mutableStateOf("") }
-    var expanded by remember { mutableStateOf(false) }
-    var selectedOption by remember { mutableStateOf("") }
+    var categoriaSelecionada by remember { mutableStateOf<Categoria?>(null) }
 
+    var titulo by remember { mutableStateOf("") }
     var selectedImages by remember { mutableStateOf<List<Uri>>(emptyList()) }
     val context = LocalContext.current
-
-    val options = listOf("Assalto", "Incêndio", "Acidente", "Obra irregular")
-
     val coroutineScope = rememberCoroutineScope()
 
     var cep by remember { mutableStateOf("") }
@@ -66,22 +51,18 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
     var cidade by remember { mutableStateOf("") }
     var estado by remember { mutableStateOf("") }
 
-
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetMultipleContents()
     ) { uris: List<Uri> ->
         selectedImages = uris
-        uris.forEach{ Log.d("Imagem Selecionada", it.toString())}
+        uris.forEach { Log.d("Imagem Selecionada", it.toString()) }
     }
 
     LaunchedEffect(Unit) {
         viewModel.carregarCategorias()
     }
 
-    Text(text = "Categoria", color = Color.White)
-
-    Box(modifier = Modifier.fillMaxSize()){
-
+    Box(modifier = Modifier.fillMaxSize()) {
         Image(
             painter = painterResource(R.drawable.wallpaper_city),
             contentDescription = null,
@@ -103,261 +84,218 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
 
             Text(text = "Nova Ocorrência", color = Color.White, fontSize = 30.sp)
 
-            Column (
-                horizontalAlignment = Alignment.Start
-            ){
+            Spacer(modifier = Modifier.height(20.dp))
 
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Text(text = "Título", color = Color.White)
-                OutlinedTextField(
-                    value = titulo,
-                    onValueChange = {titulo=it},
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color.White,
-                        unfocusedBorderColor = Color.White,
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White
-                    )
+            Text(text = "Título", color = Color.White)
+            OutlinedTextField(
+                value = titulo,
+                onValueChange = { titulo = it },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color.White,
+                    unfocusedBorderColor = Color.White,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White
                 )
+            )
 
-                Spacer(modifier = Modifier.height(15.dp))
+            Spacer(modifier = Modifier.height(15.dp))
 
-                Text(text = "Categoria", color = Color.White)
-                Box{
-                    OutlinedTextField(
-                        value = selectedOption.ifEmpty { "Selecione..." },
-                        onValueChange = {},
-                        readOnly = true,
-                        trailingIcon = {
-                            Icon(Icons.Default.ArrowDropDown, contentDescription = null)
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { expanded = true },
-                        shape = RoundedCornerShape(8.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color.White,
-                            unfocusedBorderColor = Color.White,
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White
-                        )
-                    )
+            Text(text = "Categoria", color = Color.White)
 
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = {expanded = false}
-                    ) {
-                        options.forEach{option ->
-                            DropdownMenuItem(
-                                text = { Text(option) },
-                                onClick = {
-                                    selectedOption = option
-                                    expanded = false
-                                }
-                            )
-                        }
-                    }
-                }
-
-
-                Spacer(modifier = Modifier.height(15.dp))
-
-                Text(text = "Descrição", color = Color.White)
-                OutlinedTextField(
-                    value = conteudo,
-                    onValueChange = { viewModel.conteudo.value = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(140.dp),
-                    shape = RoundedCornerShape(8.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color.White,
-                        unfocusedBorderColor = Color.White,
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White
-                    )
-                )
-
-                Spacer(modifier = Modifier.height(15.dp))
-
-                Text(text = "Endereço", color = Color.White)
-                OutlinedTextField(
-                    value = logradouro,
-                    onValueChange = {logradouro = it},
-                    label = { Text("Logradouro") },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color.White,
-                        unfocusedBorderColor = Color.White,
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White
-                    )
-                )
-                Spacer(modifier = Modifier.height(5.dp))
-                Row{
-                    OutlinedTextField(
-                        value = bairro,
-                        onValueChange = {bairro = it},
-                        label = { Text("Bairro") },
-                        modifier = Modifier
-                            .padding(end = 13.dp)
-                            .width(170.dp),
-                        shape = RoundedCornerShape(8.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color.White,
-                            unfocusedBorderColor = Color.White,
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White
-                        )
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    OutlinedTextField(
-                        value = cidade,
-                        onValueChange = {cidade = it},
-                        label = { Text("Cidade") },
-                        modifier = Modifier.width(170.dp),
-                        shape = RoundedCornerShape(8.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color.White,
-                            unfocusedBorderColor = Color.White,
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White
-                        )
-                    )
-                }
-                Spacer(modifier = Modifier.height(5.dp))
-                Row {
-                    OutlinedTextField(
-                        value = estado,
-                        onValueChange = {estado = it},
-                        label = { Text("Estado") },
-                        modifier = Modifier
-                            .padding(end = 13.dp)
-                            .width(170.dp),
-                        shape = RoundedCornerShape(8.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color.White,
-                            unfocusedBorderColor = Color.White,
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White
-                        )
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(
-                        text = "Buscar endereço pelo CEP",
-                        color = Color.Cyan,
-                        modifier = Modifier
-                            .padding(top = 10.dp)
-                            .clickable { showCepDialog = true }
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Text(text = "Adicionar imagens", color = Color.White)
-                Button(onClick = {imagePickerLauncher.launch("image/*")},
-                    shape = RoundedCornerShape(5.dp),
-                    colors = ButtonDefaults.buttonColors(Color(0xffc1121f))
-                ) {
-                    Text("Escolher arquivos")
-                }
-
-                selectedImages.forEach { uri ->
-                    Text(text = uri.lastPathSegment ?: "Imagem selecionada")
-                }
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-
-                if (showCepDialog) {
-                    AlertDialog(
-                        onDismissRequest = { showCepDialog = false },
-                        confirmButton = {
-                            Button(onClick = {
-                                if (cep.length == 8 && cep.all { it.isDigit() }) {
-                                    coroutineScope.launch {
-                                        try {
-                                            val endereco = RetrofitViaCep.service.buscarEndereco(cep)
-                                            Log.d("TESTE_CEP", endereco.logradouro ?: "sem logradouro")
-                                            logradouro = endereco.logradouro ?: ""
-                                            bairro = endereco.bairro ?: ""
-                                            cidade = endereco.localidade ?: ""
-                                            estado = endereco.uf ?: ""
-                                            showCepDialog = false
-                                        } catch (e: Exception) {
-                                            Log.e("ViaCEP", "Erro: ${e.message}")
-                                            Toast.makeText(context, "Erro ao buscar CEP", Toast.LENGTH_SHORT).show()
-                                        }
-                                    }
-                                } else {
-                                    Toast.makeText(context, "CEP inválido", Toast.LENGTH_SHORT).show()
-                                }
-                            }) {
-                                Text("Buscar")
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(onClick = { showCepDialog = false }) {
-                                Text("Cancelar")
-                            }
-                        },
-                        title = { Text("Digite seu CEP") },
-                        text = {
-                            OutlinedTextField(
-                                value = cep,
-                                onValueChange = { cep = it },
-                                label = { Text("CEP") },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                    )
-                }
-
-
-
-                Button(
-                    onClick = {
-                        viewModel.publicar(
-                            titulo = titulo,
-                            categoriaSelecionada = selectedOption,
-                            imagensUri = selectedImages,
-                            context = context,
-                            idUsuario = 1, // ✅ Coloque o ID real do usuário logado
-                            idEndereco = 1, // ✅ Coloque o ID do endereço (se for automático, integre com o backend)
-                            onSuccess = {
-                                Toast.makeText(context, "Ocorrência enviada com sucesso!", Toast.LENGTH_SHORT).show()
-                                navegacao?.navigate("feed")
-                            },
-                            onError = { msg ->
-                                Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
-                            }
-                        )
-                    },
-                    modifier = Modifier.align(Alignment.End),
-                    shape = RoundedCornerShape(5.dp),
-                    colors = ButtonDefaults.buttonColors(Color(0xffc1121f))
-                ) {
-                    Text("Enviar",
-                        modifier = Modifier.clickable {
-                            navegacao?.navigate("feed")
-                        })
-                }
-
-
-                Spacer(modifier = Modifier.height(16.dp))
+            CategoriaSelectBox(viewModel = viewModel) { categoriaSelecionada ->
+                // Atualiza o estado da tela com a categoria escolhida
+                selectedOption = categoriaSelecionada.nome_categoria
+                categoriaSelecionada = categoriaSelecionada
             }
-        }
-    }
-}
 
-@Preview(showSystemUi = true)
-@Composable
-private fun OccurrenceScreenPreview() {
-    MaterialTheme {
-        OccurrenceScreen(null)
+
+            Spacer(modifier = Modifier.height(15.dp))
+
+            Text(text = "Descrição", color = Color.White)
+            OutlinedTextField(
+                value = conteudo,
+                onValueChange = { viewModel.conteudo.value = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(140.dp),
+                shape = RoundedCornerShape(8.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color.White,
+                    unfocusedBorderColor = Color.White,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White
+                )
+            )
+
+            Spacer(modifier = Modifier.height(15.dp))
+
+            Text(text = "Endereço", color = Color.White)
+            OutlinedTextField(
+                value = logradouro,
+                onValueChange = { logradouro = it },
+                label = { Text("Logradouro") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color.White,
+                    unfocusedBorderColor = Color.White,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White
+                )
+            )
+
+            Spacer(modifier = Modifier.height(5.dp))
+            Row {
+                OutlinedTextField(
+                    value = bairro,
+                    onValueChange = { bairro = it },
+                    label = { Text("Bairro") },
+                    modifier = Modifier
+                        .padding(end = 13.dp)
+                        .weight(1f),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color.White,
+                        unfocusedBorderColor = Color.White,
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White
+                    )
+                )
+                OutlinedTextField(
+                    value = cidade,
+                    onValueChange = { cidade = it },
+                    label = { Text("Cidade") },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color.White,
+                        unfocusedBorderColor = Color.White,
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White
+                    )
+                )
+            }
+
+            Spacer(modifier = Modifier.height(5.dp))
+            Row {
+                OutlinedTextField(
+                    value = estado,
+                    onValueChange = { estado = it },
+                    label = { Text("Estado") },
+                    modifier = Modifier
+                        .padding(end = 13.dp)
+                        .weight(1f),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color.White,
+                        unfocusedBorderColor = Color.White,
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White
+                    )
+                )
+                Text(
+                    text = "Buscar endereço pelo CEP",
+                    color = Color.Cyan,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .clickable { showCepDialog = true }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Text(text = "Adicionar imagens", color = Color.White)
+            Button(
+                onClick = { imagePickerLauncher.launch("image/*") },
+                shape = RoundedCornerShape(5.dp),
+                colors = ButtonDefaults.buttonColors(Color(0xffc1121f))
+            ) {
+                Text("Escolher arquivos")
+            }
+
+            selectedImages.forEach { uri ->
+                Text(text = uri.lastPathSegment ?: "Imagem selecionada")
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            if (showCepDialog) {
+                AlertDialog(
+                    onDismissRequest = { showCepDialog = false },
+                    confirmButton = {
+                        Button(onClick = {
+                            if (cep.length == 8 && cep.all { it.isDigit() }) {
+                                coroutineScope.launch {
+                                    try {
+                                        val endereco = RetrofitViaCep.service.buscarEndereco(cep)
+                                        logradouro = endereco.logradouro ?: ""
+                                        bairro = endereco.bairro ?: ""
+                                        cidade = endereco.localidade ?: ""
+                                        estado = endereco.uf ?: ""
+                                        showCepDialog = false
+                                    } catch (e: Exception) {
+                                        Toast.makeText(context, "Erro ao buscar CEP", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            } else {
+                                Toast.makeText(context, "CEP inválido", Toast.LENGTH_SHORT).show()
+                            }
+                        }) {
+                            Text("Buscar")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showCepDialog = false }) {
+                            Text("Cancelar")
+                        }
+                    },
+                    title = { Text("Digite seu CEP") },
+                    text = {
+                        OutlinedTextField(
+                            value = cep,
+                            onValueChange = { cep = it },
+                            label = { Text("CEP") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Button(
+                onClick = {
+                    val nomeCategoria = categoriaSelecionada?.nome_categoria ?: run {
+                        Toast.makeText(context, "Selecione uma categoria", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+
+                    viewModel.publicar(
+                        titulo = titulo,
+                        categoriaSelecionada = nomeCategoria,
+                        imagensUri = selectedImages,
+                        context = context,
+                        idUsuario = 1,
+                        idEndereco = 1,
+                        onSuccess = {
+                            Toast.makeText(context, "Ocorrência enviada com sucesso!", Toast.LENGTH_SHORT).show()
+                            navegacao?.navigate("feed")
+                        },
+                        onError = { msg ->
+                            Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+                        }
+                    )
+                },
+                modifier = Modifier.align(Alignment.End),
+                shape = RoundedCornerShape(5.dp),
+                colors = ButtonDefaults.buttonColors(Color(0xffc1121f))
+            ) {
+                Text("Enviar")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+        }
     }
 }

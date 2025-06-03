@@ -2,11 +2,13 @@ package br.senai.sp.jandira.reporterdomeubairromac.viewmodel
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.senai.sp.jandira.reporterdomeubairromac.model.Categoria
 import br.senai.sp.jandira.reporterdomeubairromac.model.Post
+import br.senai.sp.jandira.reporterdomeubairromac.services.CategoriaService
 import br.senai.sp.jandira.reporterdomeubairromac.services.RetrofitFactory
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -25,7 +27,7 @@ class PostViewModel : ViewModel() {
 
     val conteudo = mutableStateOf("")
 
-    var categorias = mutableStateOf<List<Categoria>>(emptyList())
+    val categorias = mutableStateOf(listOf<Categoria>())
 
 
 
@@ -42,10 +44,18 @@ class PostViewModel : ViewModel() {
 
     fun carregarCategorias() {
         viewModelScope.launch {
-            val response = publicationService.getCategorias()
-            if (response.isSuccessful) {
-                categorias.value = response.body()?.categorias ?: emptyList()
+            try {
+                val response = CategoriaService. // ou o nome correto
+                if (response.isSuccessful) {
+                    categorias.value = response.body() ?: emptyList()
+                } else {
+                    Log.e("ViewModel", "Erro na resposta: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                Log.e("ViewModel", "Erro ao carregar categorias", e)
             }
+            Log.d("ViewModel", "Categorias carregadas: ${categorias.value}")
+
         }
     }
 
@@ -164,6 +174,8 @@ class PostViewModel : ViewModel() {
             }
         }
     }
+
+
 
     private fun uriToFile(context: Context, uri: Uri): File {
         val inputStream = context.contentResolver.openInputStream(uri)

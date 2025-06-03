@@ -1,5 +1,6 @@
 package br.senai.sp.jandira.reporterdomeubairromac.services
 
+import br.senai.sp.jandira.reporterdomeubairromac.api.CategoriaApi
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -14,6 +15,7 @@ object RetrofitFactory {
 
     val userService: UserService = retrofitFactory.create(UserService::class.java)
     val publicationService: PublicationService =retrofitFactory.create(PublicationService::class.java)
+    val categoriaApi: CategoriaApi = retrofitFactory.create(CategoriaApi::class.java)
 }
 
 
