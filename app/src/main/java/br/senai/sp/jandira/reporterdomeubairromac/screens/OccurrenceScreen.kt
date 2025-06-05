@@ -34,13 +34,18 @@ import kotlinx.coroutines.launch
 @Composable
 fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = viewModel()) {
 
-    val context = LocalContext.current
-    var showCepDialog by remember { mutableStateOf(false) }
+
     val conteudo by viewModel.conteudo
+    val context = LocalContext.current
+
+    var showCepDialog by remember { mutableStateOf(false) }
+
     var categoriaSelecionada by remember { mutableStateOf<Categoria?>(null) }
     var titulo by remember { mutableStateOf("") }
-    var selectedImages by remember { mutableStateOf<List<Uri>>(emptyList()) }
 
+    var imagensSelecionadas by remember { mutableStateOf<List<Uri>>(emptyList()) }
+
+    // ------------ ENDEREÇO ------------
     var cep by remember { mutableStateOf("") }
     var logradouro by remember { mutableStateOf("") }
     var bairro by remember { mutableStateOf("") }
@@ -49,11 +54,13 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
 
     val coroutineScope = rememberCoroutineScope()
 
-    val imagePickerLauncher = rememberLauncherForActivityResult(
+    // abrir seletor de imagens
+    val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetMultipleContents()
     ) { uris: List<Uri> ->
-        selectedImages = uris
-        uris.forEach { Log.d("Imagem Selecionada", it.toString()) }
+        if (uris != null){
+            imagensSelecionadas = uris
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -206,16 +213,11 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
 
             Text(text = "Adicionar imagens", color = Color.White)
             Button(
-                onClick = { imagePickerLauncher.launch("image/*") },
-                shape = RoundedCornerShape(5.dp),
-                colors = ButtonDefaults.buttonColors(Color(0xffc1121f))
-            ) {
-                Text("Escolher arquivos")
-            }
-
-            selectedImages.forEach { uri ->
-                Text(text = uri.lastPathSegment ?: "Imagem selecionada")
-            }
+                onClick = {
+                    launcher.launch("image/*")
+                })  {
+                    Text("Selecionar Imagens (${imagensSelecionadas})")
+                }
 
             Spacer(modifier = Modifier.height(10.dp))
 
@@ -263,52 +265,43 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            Button(
-                onClick = {
-                    val nomeCategoria = categoriaSelecionada?.nome_categoria ?: run {
-                        Toast.makeText(context, "Selecione uma categoria", Toast.LENGTH_SHORT).show()
-                        return@Button
-                    }
+            Button(onClick = {
+                if (titulo.isBlank() || categoriaSelecionada?.nome_categoria?.isBlank() == true || imagensSelecionadas.isEmpty()) {
+                    Toast.makeText(context, "Preencha todos os campos e selecione imagens", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
 
-                    if (selectedImages.isEmpty()) {
-                        Toast.makeText(context, "Selecione ao menos uma imagem", Toast.LENGTH_SHORT).show()
-                        return@Button
+                // Faz upload das imagens e publica
+                viewModel.uploadImagensAzure(
+                    context,
+                    imagensSelecionadas,
+                    onSuccess = { urls ->
+                        viewModel.publicar(
+                            titulo = titulo,
+                            categoriaSelecionada = "",
+                            imagensUrl = urls,
+                            context = context,
+                            idUsuario = 1,  // Ajuste conforme seu usuário
+                            idEndereco = 1, // Ajuste conforme seu endereço
+                            onSuccess = {
+                                Toast.makeText(context, "Ocorrência enviada com sucesso!", Toast.LENGTH_LONG).show()
+                                // Limpar campos se quiser
+                                titulo = ""
+                                categoriaSelecionada = null
+                                imagensSelecionadas = emptyList()
+                            },
+                            onError = { erro ->
+                                Toast.makeText(context, erro, Toast.LENGTH_LONG).show()
+                            }
+                        )
+                    },
+                    onError = { erro ->
+                        Toast.makeText(context, erro, Toast.LENGTH_LONG).show()
                     }
-
-                    viewModel.uploadImagens(
-                        imagensUri = selectedImages,
-                        context = context,
-                        onSuccess = { listaUrls ->
-                            viewModel.publicar(
-                                titulo = titulo,
-                                categoriaSelecionada = nomeCategoria,
-                                imagensUrl = listaUrls,
-                                context = context,
-                                idUsuario = 1,
-                                idEndereco = 1,
-                                onSuccess = {
-                                    Toast.makeText(context, "Ocorrência enviada com sucesso!", Toast.LENGTH_SHORT).show()
-                                    navegacao?.navigate("feed")
-                                },
-                                onError = { msg ->
-                                    Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
-                                }
-                            )
-                        },
-                        onError = { erro ->
-                            Toast.makeText(context, erro, Toast.LENGTH_LONG).show()
-                        }
-                    )
-                },
-                modifier = Modifier.align(Alignment.End),
-                shape = RoundedCornerShape(5.dp),
-                colors = ButtonDefaults.buttonColors(Color(0xffc1121f))
-            ) {
-                Text("Enviar")
+                )
+            }) {
+                Text("Enviar Ocorrência")
             }
-
-
-
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
