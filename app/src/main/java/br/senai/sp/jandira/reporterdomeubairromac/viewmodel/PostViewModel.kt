@@ -99,6 +99,11 @@ class PostViewModel : ViewModel() {
                 for ((index, uri) in imagensUri.withIndex()) {
                     // Lê bytes da Uri
                     val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
+                    if (inputStream == null) {
+                        onError("Não foi possível abrir InputStream para URI: $uri")
+                        return@launch
+                    }
+
                     val bytes = inputStream?.readBytes()
                     inputStream?.close()
 
