@@ -10,9 +10,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,22 +34,20 @@ import kotlinx.coroutines.launch
 @Composable
 fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = viewModel()) {
 
+    val context = LocalContext.current
     var showCepDialog by remember { mutableStateOf(false) }
-    val categorias by viewModel.categorias
     val conteudo by viewModel.conteudo
-
     var categoriaSelecionada by remember { mutableStateOf<Categoria?>(null) }
-
     var titulo by remember { mutableStateOf("") }
     var selectedImages by remember { mutableStateOf<List<Uri>>(emptyList()) }
-    val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
 
     var cep by remember { mutableStateOf("") }
     var logradouro by remember { mutableStateOf("") }
     var bairro by remember { mutableStateOf("") }
     var cidade by remember { mutableStateOf("") }
     var estado by remember { mutableStateOf("") }
+
+    val coroutineScope = rememberCoroutineScope()
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetMultipleContents()
@@ -59,8 +57,10 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
     }
 
     LaunchedEffect(Unit) {
-        viewModel.carregarCategorias()
+        viewModel.getCategorias()
     }
+
+    val categorias = viewModel.categorias.value
 
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
@@ -81,7 +81,6 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             Text(text = "Nova Ocorrência", color = Color.White, fontSize = 30.sp)
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -103,13 +102,12 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
             Spacer(modifier = Modifier.height(15.dp))
 
             Text(text = "Categoria", color = Color.White)
-
-            CategoriaSelectBox(viewModel = viewModel) { categoriaSelecionada ->
-                // Atualiza o estado da tela com a categoria escolhida
-                selectedOption = categoriaSelecionada.nome_categoria
-                categoriaSelecionada = categoriaSelecionada
-            }
-
+            CategoriaSelectBox(
+                viewModel = viewModel,
+                onCategoriaSelecionada = { categoria ->
+                    categoriaSelecionada = categoria
+                }
+            )
 
             Spacer(modifier = Modifier.height(15.dp))
 
@@ -272,19 +270,33 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
                         return@Button
                     }
 
-                    viewModel.publicar(
-                        titulo = titulo,
-                        categoriaSelecionada = nomeCategoria,
+                    if (selectedImages.isEmpty()) {
+                        Toast.makeText(context, "Selecione ao menos uma imagem", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+
+                    viewModel.uploadImagens(
                         imagensUri = selectedImages,
                         context = context,
-                        idUsuario = 1,
-                        idEndereco = 1,
-                        onSuccess = {
-                            Toast.makeText(context, "Ocorrência enviada com sucesso!", Toast.LENGTH_SHORT).show()
-                            navegacao?.navigate("feed")
+                        onSuccess = { listaUrls ->
+                            viewModel.publicar(
+                                titulo = titulo,
+                                categoriaSelecionada = nomeCategoria,
+                                imagensUrl = listaUrls,
+                                context = context,
+                                idUsuario = 1,
+                                idEndereco = 1,
+                                onSuccess = {
+                                    Toast.makeText(context, "Ocorrência enviada com sucesso!", Toast.LENGTH_SHORT).show()
+                                    navegacao?.navigate("feed")
+                                },
+                                onError = { msg ->
+                                    Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+                                }
+                            )
                         },
-                        onError = { msg ->
-                            Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+                        onError = { erro ->
+                            Toast.makeText(context, erro, Toast.LENGTH_LONG).show()
                         }
                     )
                 },
@@ -294,6 +306,8 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
             ) {
                 Text("Enviar")
             }
+
+
 
             Spacer(modifier = Modifier.height(16.dp))
         }

@@ -1,62 +1,65 @@
 package br.senai.sp.jandira.reporterdomeubairromac.components
 
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import br.senai.sp.jandira.reporterdomeubairromac.model.Categoria
 import br.senai.sp.jandira.reporterdomeubairromac.viewmodel.PostViewModel
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CategoriaSelectBox(viewModel: PostViewModel, onCategoriaSelecionada: (Categoria) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
-    var selectedText by remember { mutableStateOf("Selecione uma categoria") }
-
+fun CategoriaSelectBox(
+    viewModel: PostViewModel,
+    onCategoriaSelecionada: (Categoria) -> Unit = {}
+) {
     val categorias = viewModel.categorias.value
+    var expanded by remember { mutableStateOf(false) }
+    var categoriaSelecionada by remember { mutableStateOf<Categoria?>(null) }
 
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = { expanded = !expanded }
     ) {
-        TextField(
-            value = selectedText,
+        OutlinedTextField(
+            value = categoriaSelecionada?.nome_categoria ?: "",
             onValueChange = {},
             readOnly = true,
-            label = { Text("Categoria") },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
-            modifier = Modifier.menuAnchor()
+            label = { Text("Categoria", color = Color.White) },
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+            },
+            modifier = Modifier
+                .menuAnchor()
+                .fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color.White,
+                unfocusedBorderColor = Color.White,
+                focusedTextColor = Color.White,
+                unfocusedTextColor = Color.White
+            )
         )
 
-        DropdownMenu(
+        ExposedDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
-            if (categorias.isEmpty()) {
+            categorias.forEach { categoria ->
                 DropdownMenuItem(
-                    text = { Text("Nenhuma categoria disponível") },
-                    onClick = {}
+                    text = { Text(categoria.nome_categoria, fontSize = 16.sp) },
+                    onClick = {
+                        categoriaSelecionada = categoria
+                        expanded = false
+                        onCategoriaSelecionada(categoria)
+                    },
+                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
                 )
-            } else {
-                categorias.forEach { categoria ->
-                    DropdownMenuItem(
-                        text = { Text(categoria.nome_categoria) },
-                        onClick = {
-                            selectedText = categoria.nome_categoria
-                            expanded = false
-                            onCategoriaSelecionada(categoria)
-                        }
-                    )
-                }
             }
         }
     }

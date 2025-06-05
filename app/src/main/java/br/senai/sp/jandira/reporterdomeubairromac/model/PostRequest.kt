@@ -7,5 +7,5 @@ data class PostRequest(
     val id_usuario:Int,
     val id_categoria:Int,
     val id_status:Int,
-    val id_endereco: Int
+    val id_endereco: Int,
 )

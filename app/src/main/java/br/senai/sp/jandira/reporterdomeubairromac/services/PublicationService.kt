@@ -25,7 +25,4 @@ interface PublicationService {
     suspend fun enviarMidia(
         @Body midia: Map<String, @JvmSuppressWildcards Any>
     ): Response<ResponsePadrao>
-
-    @GET("categorias") // ou o endpoint correto
-    suspend fun getCategorias(): Response<CategoriaRespose>
 }

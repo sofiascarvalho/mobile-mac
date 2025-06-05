@@ -5,6 +5,6 @@ import retrofit2.Response
 import retrofit2.http.GET
 
 interface CategoriaApi {
-    @GET("categorias") // ou o endpoint correto
-    suspend fun listarCategorias(): Response<List<Categoria>>
+    @GET("categoria") // ou o endpoint correto
+    suspend fun getCategorias(): Response<List<Categoria>>
 }
