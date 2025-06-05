@@ -4,10 +4,13 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.text.intl.Locale
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.senai.sp.jandira.reporterdomeubairromac.model.Categoria
+import br.senai.sp.jandira.reporterdomeubairromac.model.MídiaRequest
 import br.senai.sp.jandira.reporterdomeubairromac.model.Post
+import br.senai.sp.jandira.reporterdomeubairromac.model.PostRequest
 import br.senai.sp.jandira.reporterdomeubairromac.services.RetrofitFactory
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.launch
@@ -18,6 +21,7 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 import java.io.InputStream
+import java.time.LocalDate
 
 
 class PostViewModel : ViewModel() {
@@ -63,13 +67,7 @@ class PostViewModel : ViewModel() {
      * Ajuste esse mapeamento conforme as IDs reais do seu banco de dados.
      */
     private fun obterIdCategoria(nomeCategoria: String): Int {
-        return when (nomeCategoria) {
-            "Assalto"         -> 1
-            "Incêndio"       -> 2
-            "Acidente"        -> 3
-            "Obra irregular" -> 4
-            else              -> 0 // ou lance uma exceção, se preferir
-        }
+        return categorias.value.firstOrNull{it.nome_categoria == nomeCategoria}?.id_categoria?:0
     }
 
     // ------------------------------------------------------------
@@ -170,21 +168,59 @@ class PostViewModel : ViewModel() {
     ) {
         viewModelScope.launch {
             try {
-                // Monta um Map<String, Any> exatamente como a API espera
-                val ocorrenciaMap = mapOf(
-                    "titulo"     to titulo,
-                    "descricao"  to conteudo.value,
-                    "categoria"  to categoriaSelecionada,
-                    "imagens"    to imagensUrl,
-                    "id_usuario" to idUsuario,
-                    "id_endereco" to idEndereco
+                val idCategoria = obterIdCategoria(categoriaSelecionada)
+//                PostRequest ocorrenciaMap = mapOf(
+//                    "titulo"     to titulo,
+//                    "descricao"  to conteudo.value,
+//                    "data_criacao" to LocalDate.now(),
+//                    "imagens"    to imagensUrl,
+//                    "id_usuario" to idUsuario,
+//                    "id_endereco" to idEndereco,
+//                    "id_categoria" to idCategoria,
+//                    "id_status" to 1
+//                )
+                val ocorrenciaMap = PostRequest(
+                    titulo = titulo,
+                    descricao = conteudo.value,
+                    data_criacao = LocalDate.now().toString(),
+                    id_usuario = idUsuario,
+                    id_categoria = idCategoria,
+                    id_status = 1,
+                    id_endereco = idEndereco
                 )
+                Log.d("OCORRENCIA", "Enviando: $ocorrenciaMap")
 
-                val response = publicationService.enviarOcorrencia(ocorrenciaMap)
-                if (response.isSuccessful) {
+                val ocorrenciaResponse = publicationService.enviarOcorrencia(ocorrenciaMap)
+                if (ocorrenciaResponse.isSuccessful) {
+                    val idOcorrencia = ocorrenciaResponse.body()?.id_ocorrencia ?: return@launch
+
+                    imagensUrl.forEachIndexed { index, url ->
+                        val nomeArquivo = "imagem_$index.jpg"
+//                        val midiaMap = mapOf(
+//                            "nome_arquivo" to nomeArquivo,
+//                            "url" to url,
+//                            "tamanho" to 1000000,
+//                            "id_ocorrencia" to idOcorrencia,
+//                            "id_usuario" to idUsuario
+//                        )
+
+                        val midiaMap = MídiaRequest(
+                            nome_arquivo = nomeArquivo,
+                            url = url,
+                            tamanho = 1000000,
+                            id_ocorrencia = idOcorrencia,
+                            id_usuario = idUsuario
+                        )
+                        val midiaResponse = publicationService.enviarMidia(midiaMap)
+
+                        if (!midiaResponse.isSuccessful){
+                            onError("Erro ao enviar mídia $index: ${midiaResponse.code()}")
+                            return@launch
+                        }
+                    }
                     onSuccess()
                 } else {
-                    onError("Erro ao enviar ocorrência: ${response.code()} - ${response.message()}")
+                    onError("Erro ao enviar ocorrência: ${ocorrenciaResponse.code()}")
                 }
             } catch (e: Exception) {
                 onError("Falha na conexão: ${e.message}")

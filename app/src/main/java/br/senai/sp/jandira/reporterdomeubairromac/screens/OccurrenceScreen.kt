@@ -51,6 +51,7 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
     var bairro by remember { mutableStateOf("") }
     var cidade by remember { mutableStateOf("") }
     var estado by remember { mutableStateOf("") }
+    var urlImagem by remember { mutableStateOf("") }
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -212,12 +213,20 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
             Spacer(modifier = Modifier.height(20.dp))
 
             Text(text = "Adicionar imagens", color = Color.White)
-            Button(
-                onClick = {
-                    launcher.launch("image/*")
-                })  {
-                    Text("Selecionar Imagens (${imagensSelecionadas})")
-                }
+            Text(text = "URL da Imagem", color = Color.White)
+            OutlinedTextField(
+                value = urlImagem,
+                onValueChange = { urlImagem = it },
+                label = { Text("Cole a URL da imagem") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color.White,
+                    unfocusedBorderColor = Color.White,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White
+                )
+            )
 
             Spacer(modifier = Modifier.height(10.dp))
 
@@ -266,37 +275,25 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
             Spacer(modifier = Modifier.height(20.dp))
 
             Button(onClick = {
-                if (titulo.isBlank() || categoriaSelecionada?.nome_categoria?.isBlank() == true || imagensSelecionadas.isEmpty()) {
-                    Toast.makeText(context, "Preencha todos os campos e selecione imagens", Toast.LENGTH_SHORT).show()
-                    return@Button
-                }
+
 
                 // Faz upload das imagens e publica
-                viewModel.uploadImagensAzure(
-                    context,
-                    imagensSelecionadas,
-                    onSuccess = { urls ->
-                        viewModel.publicar(
-                            titulo = titulo,
-                            categoriaSelecionada = "",
-                            imagensUrl = urls,
-                            context = context,
-                            idUsuario = 1,  // Ajuste conforme seu usuário
-                            idEndereco = 1, // Ajuste conforme seu endereço
-                            onSuccess = {
-                                Toast.makeText(context, "Ocorrência enviada com sucesso!", Toast.LENGTH_LONG).show()
-                                // Limpar campos se quiser
-                                titulo = ""
-                                categoriaSelecionada = null
-                                imagensSelecionadas = emptyList()
-                            },
-                            onError = { erro ->
-                                Toast.makeText(context, erro, Toast.LENGTH_LONG).show()
-                            }
-                        )
+                viewModel.publicar(
+                    titulo = titulo,
+                    categoriaSelecionada = categoriaSelecionada?.nome_categoria ?: "",
+                    imagensUrl = listOf(urlImagem),
+                    context = context,
+                    idUsuario = 1,  // Ajuste conforme necessário
+                    idEndereco = 1, // Ajuste conforme necessário
+                    onSuccess = {
+                        Toast.makeText(context, "Ocorrência enviada com sucesso!", Toast.LENGTH_LONG).show()
+                        titulo = ""
+                        categoriaSelecionada = null
+                        urlImagem = ""
                     },
                     onError = { erro ->
                         Toast.makeText(context, erro, Toast.LENGTH_LONG).show()
+                        Log.d("test", erro)
                     }
                 )
             }) {
