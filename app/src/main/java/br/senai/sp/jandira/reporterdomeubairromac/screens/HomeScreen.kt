@@ -56,22 +56,21 @@ fun HomeScreen(navegacao: NavHostController?) {
             Column (
                 modifier = Modifier.fillMaxWidth().height(60.dp).background(Color(0x44ffffff)),
                 verticalArrangement = Arrangement.Center
-            ){
-                Row (
+            ) {
+                Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
-                ){
+                ) {
                     Icon(
                         imageVector = Icons.Default.AddCircle,
                         contentDescription = "Fazer ocorrência",
                         modifier = Modifier
-                            .size(25.dp).clickable {
+                            .size(25.dp)
+                            .clickable {
                                 Log.d("NAV", "Indo para OptionScreen")
-                            navegacao?.navigate("option") {
-                                launchSingleTop = true
+                                navegacao!!.navigate("option")
                             }
-                        }
                     )
 
                     OutlinedTextField(
@@ -79,8 +78,10 @@ fun HomeScreen(navegacao: NavHostController?) {
                         onValueChange = {},
                         trailingIcon = {
                             Icon(
-                                imageVector = Icons.Default.Search, contentDescription = "Pesquisar cidade",
-                                tint = Color.Black, modifier = Modifier.padding(3.dp)
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "Pesquisar cidade",
+                                tint = Color.Black,
+                                modifier = Modifier.padding(3.dp)
                             )
                         },
                         shape = RoundedCornerShape(8.dp),
@@ -93,8 +94,8 @@ fun HomeScreen(navegacao: NavHostController?) {
                         imageVector = Icons.Default.AccountCircle, contentDescription = "Perfil",
                         modifier = Modifier
                             .size(25.dp).clickable {
-                            navegacao?.navigate("profile")
-                        }
+                                navegacao?.navigate("profile")
+                            }
                     )
                 }
             }
@@ -102,8 +103,8 @@ fun HomeScreen(navegacao: NavHostController?) {
     }
 }
 
-@Preview(showSystemUi = true)
+/*@Preview(showSystemUi = true)
 @Composable
 private fun HomeScreenPreview() {
     HomeScreen(null)
-}
+}*/

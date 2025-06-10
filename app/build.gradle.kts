@@ -112,4 +112,12 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.15.0"))
 
     implementation(platform("com.google.firebase:firebase-bom:33.15.0"))
+
+    implementation ("org.osmdroid:osmdroid-android:6.1.16")
+
+    implementation ("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
+
+    implementation("org.osmdroid:osmdroid-android:6.1.14")
+
+    implementation("androidx.preference:preference-ktx:1.2.0")
 }
