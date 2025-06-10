@@ -38,6 +38,9 @@ class PostViewModel : ViewModel() {
     // Lista de categorias obtida da API
     val categorias = mutableStateOf<List<Categoria>>(listOf())
 
+    //lista de ocorrencias vindas da API
+    val listaOcorrencias = mutableStateOf<List<Post>>(listOf())
+
     // ------------------------------------------------------------
     // MÉTODOS DE CATEGORIAS
     // ------------------------------------------------------------
@@ -61,6 +64,25 @@ class PostViewModel : ViewModel() {
             }
         }
     }
+
+    fun getOcorrencias() {
+        viewModelScope.launch {
+            try {
+                val response = publicationService.getOcorrencias()
+                if (response.isSuccessful) {
+                    listaOcorrencias.value = response.body()?.ocorrencias ?: emptyList()
+                    Log.d("API", "Ocorrências carregadas: ${listaOcorrencias.value.size}")
+                } else {
+                    listaOcorrencias.value = emptyList()
+                    Log.e("API", "Erro ao buscar ocorrências: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                listaOcorrencias.value = emptyList()
+                Log.e("API", "Falha ao buscar ocorrências", e)
+            }
+        }
+    }
+
 
     /**
      * Converte o nome da categoria (string) no ID correspondente.
@@ -192,17 +214,15 @@ class PostViewModel : ViewModel() {
 
                 val ocorrenciaResponse = publicationService.enviarOcorrencia(ocorrenciaMap)
                 if (ocorrenciaResponse.isSuccessful) {
-                    val idOcorrencia = ocorrenciaResponse.body()?.id_ocorrencia ?: return@launch
+                    val ocorrencia = ocorrenciaResponse.body()
+                    if (ocorrencia == null) {
+                        onError("Resposta da API não contém ocorrência válida")
+                        return@launch
+                    }
+                    val idOcorrencia = ocorrencia.id_ocorrencia
 
                     imagensUrl.forEachIndexed { index, url ->
                         val nomeArquivo = "imagem_$index.jpg"
-//                        val midiaMap = mapOf(
-//                            "nome_arquivo" to nomeArquivo,
-//                            "url" to url,
-//                            "tamanho" to 1000000,
-//                            "id_ocorrencia" to idOcorrencia,
-//                            "id_usuario" to idUsuario
-//                        )
 
                         val midiaMap = MídiaRequest(
                             nome_arquivo = nomeArquivo,
@@ -211,22 +231,26 @@ class PostViewModel : ViewModel() {
                             id_ocorrencia = idOcorrencia,
                             id_usuario = idUsuario
                         )
+
                         val midiaResponse = publicationService.enviarMidia(midiaMap)
 
-                        if (!midiaResponse.isSuccessful){
+                        if (!midiaResponse.isSuccessful) {
                             onError("Erro ao enviar mídia $index: ${midiaResponse.code()}")
                             return@launch
                         }
                     }
+
                     onSuccess()
                 } else {
                     onError("Erro ao enviar ocorrência: ${ocorrenciaResponse.code()}")
                 }
+
             } catch (e: Exception) {
                 onError("Falha na conexão: ${e.message}")
             }
         }
     }
+
 
     // ------------------------------------------------------------
     // FUNÇÃO AUXILIAR (CASO PRECISE TRANSFORMAR URI EM File)

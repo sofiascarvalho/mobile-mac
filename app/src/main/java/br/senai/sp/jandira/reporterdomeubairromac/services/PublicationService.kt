@@ -4,6 +4,7 @@ import br.senai.sp.jandira.reporterdomeubairromac.model.Categoria
 import br.senai.sp.jandira.reporterdomeubairromac.model.CategoriaRespose
 import br.senai.sp.jandira.reporterdomeubairromac.model.MídiaRequest
 import br.senai.sp.jandira.reporterdomeubairromac.model.OccorenciaResponse
+import br.senai.sp.jandira.reporterdomeubairromac.model.Ocorrencia
 import br.senai.sp.jandira.reporterdomeubairromac.model.Post
 import br.senai.sp.jandira.reporterdomeubairromac.model.PostRequest
 import br.senai.sp.jandira.reporterdomeubairromac.model.ResponsePadrao
@@ -22,10 +23,14 @@ interface PublicationService {
     @POST("ocorrencias")
     suspend fun enviarOcorrencia(
         @Body ocorrencia: PostRequest
-    ): Response<OccorenciaResponse>
+    ): Response<Ocorrencia>
 
     @POST("midias")
     suspend fun enviarMidia(
         @Body midia: MídiaRequest
     ): Response<Unit>
+
+    @GET("ocorrencias")
+    suspend fun getOcorrencias(): Response<OccorenciaResponse>
+
 }
