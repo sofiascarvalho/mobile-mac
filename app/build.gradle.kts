@@ -55,7 +55,8 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.firebase.common.ktx)
-    implementation(libs.play.services.location)
+    // implementation(libs.play.services.location) // Removido, já que você tem uma versão explícita abaixo
+    implementation(libs.androidx.runtime.livedata)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -79,31 +80,27 @@ dependencies {
     //coil
     implementation("io.coil-kt:coil-compose:2.7.0")
 
-
-    implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
-    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
-    implementation ("androidx.activity:activity-compose:1.8.2")
-
-    implementation ("androidx.compose.ui:ui:1.5.0")
-    implementation ("androidx.compose.material3:material3:1.1.0")
-    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
+    // Você tem essas dependências duplicadas com versões diferentes em libs.versions.toml ou em outro lugar.
+    // É melhor manter uma única declaração e usar a versão mais recente.
+    implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.8.0") // Atualizado para uma versão mais recente
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.0") // Atualizado para uma versão mais recente
+    implementation ("androidx.activity:activity-compose:1.9.0") // Atualizado para uma versão mais recente
+    implementation ("androidx.compose.ui:ui:1.6.8") // Atualizado para uma versão mais recente
+    implementation ("androidx.compose.material3:material3:1.2.1") // Atualizado para uma versão mais recente
 
     implementation ("com.github.Drjacky:ImagePicker:2.3.22")
-
-
 
     implementation ("com.squareup.okhttp3:okhttp:4.9.3")
     implementation ("com.squareup.okhttp3:logging-interceptor:4.9.3")
 
-    implementation ("androidx.core:core-ktx:1.12.0")
+    implementation ("androidx.core:core-ktx:1.12.0") // Já está em libs.androidx.core.ktx, mantenha um
 
-    implementation("com.google.firebase:firebase-storage-ktx")
+    implementation("com.google.firebase:firebase-storage-ktx:20.3.0") // Atualizado para uma versão mais recente
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.1") // Atualizado para uma versão mais recente
 
-    implementation ("com.google.firebase:firebase-storage-ktx:20.2.0") // versão atual, verifique a mais recente
-    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
-
-    //maps
-    implementation ("com.google.android.gms:play-services-location:21.0.1")
-    implementation ("com.google.maps.android:maps-compose:4.3.3")
+    // Maps - Versões consolidadas e mais recentes
+    implementation ("com.google.android.gms:play-services-location:21.0.1") // Para APIs de localização
+    implementation("com.google.android.gms:play-services-maps:18.2.0") // Para o Maps SDK
+    implementation ("com.google.maps.android:maps-compose:6.6.0") // Versão atual do Compose Maps
 
 }

@@ -22,6 +22,8 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 import java.io.InputStream
 import java.time.LocalDate
+import androidx.lifecycle.MutableLiveData
+import br.senai.sp.jandira.reporterdomeubairromac.model.GetOcorrencia
 
 
 class PostViewModel : ViewModel() {
@@ -39,7 +41,7 @@ class PostViewModel : ViewModel() {
     val categorias = mutableStateOf<List<Categoria>>(listOf())
 
     //lista de ocorrencias vindas da API
-    val listaOcorrencias = mutableStateOf<List<Post>>(listOf())
+    val listaOcorrencias = MutableLiveData<List<GetOcorrencia>>(emptyList())
 
     // ------------------------------------------------------------
     // MÉTODOS DE CATEGORIAS
@@ -70,7 +72,7 @@ class PostViewModel : ViewModel() {
             try {
                 val response = publicationService.getOcorrencias()
                 if (response.isSuccessful) {
-                    listaOcorrencias.value = response.body()?.ocorrencias ?: emptyList()
+                    listaOcorrencias.postValue(response.body()?.ocorrencias ?: emptyList())
                     Log.d("API", "Ocorrências carregadas: ${listaOcorrencias.value.size}")
                 } else {
                     listaOcorrencias.value = emptyList()
@@ -79,6 +81,89 @@ class PostViewModel : ViewModel() {
             } catch (e: Exception) {
                 listaOcorrencias.value = emptyList()
                 Log.e("API", "Falha ao buscar ocorrências", e)
+            }
+        }
+    }
+
+    // ... (seu PostViewModel)
+
+    fun publicar(
+        titulo: String,
+        categoriaSelecionada: String,
+        imagensUrl: List<String>,
+        context: Context, // 'context' ainda não está sendo usado dentro desta função, mas pode ficar.
+        idUsuario: Int,
+        idEndereco: Int,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                val idCategoria = obterIdCategoria(categoriaSelecionada)
+
+                // Assumindo que sua PostRequest está como definimos para ENVIO
+                // (sem id_ocorrencia, com campos String não-nulos etc.)
+                val ocorrenciaMap = PostRequest(
+                    titulo = titulo,
+                    descricao = conteudo.value,
+                    dataCriacao = LocalDate.now().toString(), // dataCriacao na PostRequest (camelCase)
+                    idUsuario = idUsuario,
+                    idCategoria = idCategoria,
+                    idStatus = 1,
+                    idEndereco = idEndereco
+                )
+                Log.d("PostViewModel", "Enviando Ocorrência: $ocorrenciaMap")
+
+                // IMPORTANTE: Sua interface de serviço (PublicationService) deve ter a assinatura:
+                // suspend fun enviarOcorrencia(@Body request: PostRequest): Response<PostCreateResponse>
+                val response = publicationService.enviarOcorrencia(ocorrenciaMap)
+
+                if (response.isSuccessful) {
+                    val postCreateResponse = response.body() // Agora é do tipo PostCreateResponse
+                    // Verificando se a resposta e a lista 'result' não são nulas e contêm itens
+                    if (postCreateResponse == null || postCreateResponse.result.isNullOrEmpty()) {
+                        onError("Resposta da API não contém dados válidos de ocorrência criada.")
+                        return@launch
+                    }
+
+                    // Pegando o primeiro item da lista 'result' e seu id_ocorrencia
+                    val idOcorrencia = postCreateResponse.result.firstOrNull()?.idOcorrencia
+
+                    if (idOcorrencia == null) {
+                        onError("ID da ocorrência criada não encontrado na resposta da API.")
+                        return@launch
+                    }
+
+                    imagensUrl.forEachIndexed { index, url ->
+                        val nomeArquivo = "imagem_${System.currentTimeMillis()}_$index.jpg" // Nome único
+
+                        val midiaMap = MídiaRequest(
+                            nome_arquivo = nomeArquivo,
+                            url = url,
+                            tamanho = 1000000,
+                            id_ocorrencia = idOcorrencia, // Usando o idOcorrencia obtido
+                            id_usuario = idUsuario
+                        )
+
+                        val midiaResponse = publicationService.enviarMidia(midiaMap)
+
+                        if (!midiaResponse.isSuccessful) {
+                            onError("Erro ao enviar mídia $index: ${midiaResponse.code()} - ${midiaResponse.errorBody()?.string()}")
+                            Log.e("PostViewModel", "Erro na API ao enviar mídia: ${midiaResponse.code()} - ${midiaResponse.errorBody()?.string()}")
+                            return@launch
+                        }
+                    }
+
+                    onSuccess()
+                    Log.d("PostViewModel", "Ocorrência e mídias publicadas com sucesso!")
+                } else {
+                    onError("Erro ao enviar ocorrência: ${response.code()} - ${response.errorBody()?.string()}")
+                    Log.e("PostViewModel", "Erro na API ao enviar ocorrência: ${response.code()} - ${response.errorBody()?.string()}")
+                }
+
+            } catch (e: Exception) {
+                onError("Falha na conexão ou erro inesperado: ${e.message}")
+                Log.e("PostViewModel", "Erro inesperado ao publicar ocorrência", e)
             }
         }
     }
@@ -178,78 +263,7 @@ class PostViewModel : ViewModel() {
      * @param onSuccess Callback chamado quando o envio for bem-sucedido
      * @param onError Callback chamado caso ocorra algum erro, recebendo a mensagem de erro
      */
-    fun publicar(
-        titulo: String,
-        categoriaSelecionada: String,
-        imagensUrl: List<String>,
-        context: Context,
-        idUsuario: Int,
-        idEndereco: Int,
-        onSuccess: () -> Unit,
-        onError: (String) -> Unit
-    ) {
-        viewModelScope.launch {
-            try {
-                val idCategoria = obterIdCategoria(categoriaSelecionada)
-//                PostRequest ocorrenciaMap = mapOf(
-//                    "titulo"     to titulo,
-//                    "descricao"  to conteudo.value,
-//                    "data_criacao" to LocalDate.now(),
-//                    "imagens"    to imagensUrl,
-//                    "id_usuario" to idUsuario,
-//                    "id_endereco" to idEndereco,
-//                    "id_categoria" to idCategoria,
-//                    "id_status" to 1
-//                )
-                val ocorrenciaMap = PostRequest(
-                    titulo = titulo,
-                    descricao = conteudo.value,
-                    data_criacao = LocalDate.now().toString(),
-                    id_usuario = idUsuario,
-                    id_categoria = idCategoria,
-                    id_status = 1,
-                    id_endereco = idEndereco
-                )
-                Log.d("OCORRENCIA", "Enviando: $ocorrenciaMap")
 
-                val ocorrenciaResponse = publicationService.enviarOcorrencia(ocorrenciaMap)
-                if (ocorrenciaResponse.isSuccessful) {
-                    val ocorrencia = ocorrenciaResponse.body()
-                    if (ocorrencia == null) {
-                        onError("Resposta da API não contém ocorrência válida")
-                        return@launch
-                    }
-                    val idOcorrencia = ocorrencia.id_ocorrencia
-
-                    imagensUrl.forEachIndexed { index, url ->
-                        val nomeArquivo = "imagem_$index.jpg"
-
-                        val midiaMap = MídiaRequest(
-                            nome_arquivo = nomeArquivo,
-                            url = url,
-                            tamanho = 1000000,
-                            id_ocorrencia = idOcorrencia,
-                            id_usuario = idUsuario
-                        )
-
-                        val midiaResponse = publicationService.enviarMidia(midiaMap)
-
-                        if (!midiaResponse.isSuccessful) {
-                            onError("Erro ao enviar mídia $index: ${midiaResponse.code()}")
-                            return@launch
-                        }
-                    }
-
-                    onSuccess()
-                } else {
-                    onError("Erro ao enviar ocorrência: ${ocorrenciaResponse.code()}")
-                }
-
-            } catch (e: Exception) {
-                onError("Falha na conexão: ${e.message}")
-            }
-        }
-    }
 
 
     // ------------------------------------------------------------
@@ -260,7 +274,7 @@ class PostViewModel : ViewModel() {
      * Converte um URI em um File temporário dentro do cache.
      * Está à disposição caso você precise manipular o arquivo antes de fazer upload
      * (mas, no exemplo atual, não é usado, já que usamos putFile(uri) diretamente).
-     */
+     *
     private fun uriToFile(context: Context, uri: Uri): File {
         val inputStream = context.contentResolver.openInputStream(uri)
         val tempFile = File.createTempFile("temp_image", ".jpg", context.cacheDir)
@@ -271,4 +285,5 @@ class PostViewModel : ViewModel() {
         }
         return tempFile
     }
+    */
 }

@@ -1,6 +1,11 @@
+// br.senai.sp.jandira.reporterdomeubairromac.model/OccorenciaResponse.kt
 package br.senai.sp.jandira.reporterdomeubairromac.model
 
-data class OccorenciaResponse(
-    val ocorrencias: List<Post>
-)
+import com.google.gson.annotations.SerializedName
 
+data class OccorenciaResponse(
+    val status: Boolean,
+    @SerializedName("status_code") val statusCode: Int,
+    val itens: Int,
+    val ocorrencias: List<GetOcorrencia> // <-- Aqui, deve ser uma lista da Ocorrência que você *recebe* do GET
+)

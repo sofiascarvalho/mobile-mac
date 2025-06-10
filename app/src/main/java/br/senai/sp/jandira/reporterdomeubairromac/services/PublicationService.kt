@@ -6,6 +6,7 @@ import br.senai.sp.jandira.reporterdomeubairromac.model.MídiaRequest
 import br.senai.sp.jandira.reporterdomeubairromac.model.OccorenciaResponse
 import br.senai.sp.jandira.reporterdomeubairromac.model.Ocorrencia
 import br.senai.sp.jandira.reporterdomeubairromac.model.Post
+import br.senai.sp.jandira.reporterdomeubairromac.model.PostCreateResponse
 import br.senai.sp.jandira.reporterdomeubairromac.model.PostRequest
 import br.senai.sp.jandira.reporterdomeubairromac.model.ResponsePadrao
 import okhttp3.MultipartBody
@@ -23,7 +24,7 @@ interface PublicationService {
     @POST("ocorrencias")
     suspend fun enviarOcorrencia(
         @Body ocorrencia: PostRequest
-    ): Response<Ocorrencia>
+    ): Response<PostCreateResponse>
 
     @POST("midias")
     suspend fun enviarMidia(

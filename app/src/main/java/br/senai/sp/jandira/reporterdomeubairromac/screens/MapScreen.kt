@@ -1,15 +1,38 @@
 package br.senai.sp.jandira.reporterdomeubairromac.screens
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Modifier
 import br.senai.sp.jandira.reporterdomeubairromac.viewmodel.PostViewModel
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.GoogleMap
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.platform.LocalContext
+import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
+
+
+// Constantes para configuração do mapa
+private val DEFAULT_LOCATION = LatLng(-23.56847, -46.88371)
+private const val DEFAULT_ZOOM = 12f
 
 @Composable
-fun MapaScreen(postViewModel: PostViewModel) {
+fun MapScreen(postViewModel: PostViewModel) {
     val context = LocalContext.current
-    val ocorrencias by postViewModel.ocorrencias
+
+    LaunchedEffect(Unit) {
+        postViewModel.getOcorrencias()
+    }
+
+    val ocorrencias by postViewModel.listaOcorrencias.observeAsState(initial = emptyList())
 
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(LatLng(-23.5505, -46.6333), 12f)
+        position = CameraPosition.fromLatLngZoom(DEFAULT_LOCATION, DEFAULT_ZOOM)
     }
 
     GoogleMap(
@@ -17,18 +40,19 @@ fun MapaScreen(postViewModel: PostViewModel) {
         cameraPositionState = cameraPositionState
     ) {
         ocorrencias.forEach { post ->
-            val lat = post.endereco[0].latitude.toDouble()
-            val lng = post.endereco[0].longitude.toDouble()
+            // AQUI ESTÁ A MUDANÇA: adicionado '?' após post.endereco
+            post.endereco?.firstOrNull()?.let { endereco ->
+                val lat = endereco.latitude
+                val lng = endereco.longitude
 
-            Marker(
-                position = LatLng(lat, lng),
-                title = post.titulo,
-                snippet = post.descricao
-            )
+                if (lat != null && lng != null) {
+                    Marker(
+                        state = MarkerState(position = LatLng(lat, lng)),
+                        title = post.titulo ?: "Sem título",
+                        snippet = post.descricao ?: "Sem descrição"
+                    )
+                }
+            }
         }
     }
-}
-
-class LocalContext {
-
 }
