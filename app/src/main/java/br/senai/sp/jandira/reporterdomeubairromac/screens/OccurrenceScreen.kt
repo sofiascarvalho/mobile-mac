@@ -282,7 +282,6 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
                     titulo = titulo,
                     categoriaSelecionada = categoriaSelecionada?.nome_categoria ?: "",
                     imagensUrl = listOf(urlImagem),
-                    context = context,
                     idUsuario = 1,  // Ajuste conforme necessário
                     idEndereco = 1, // Ajuste conforme necessário
                     onSuccess = {

@@ -2,7 +2,7 @@ package br.senai.sp.jandira.reporterdomeubairromac.services
 
 import br.senai.sp.jandira.reporterdomeubairromac.model.Categoria
 import br.senai.sp.jandira.reporterdomeubairromac.model.CategoriaRespose
-import br.senai.sp.jandira.reporterdomeubairromac.model.MídiaRequest
+import br.senai.sp.jandira.reporterdomeubairromac.model.MidiaRequest
 import br.senai.sp.jandira.reporterdomeubairromac.model.OccorenciaResponse
 import br.senai.sp.jandira.reporterdomeubairromac.model.Ocorrencia
 import br.senai.sp.jandira.reporterdomeubairromac.model.Post
@@ -31,13 +31,12 @@ interface PublicationService {
 
     @POST("midias")
     suspend fun enviarMidia(
-        @Header("Content-Type") contentType: String = "application/json",
-        @Body midia: MídiaRequest
+        @Body midia: MidiaRequest
     ): Response<Unit>
 
     @GET("ocorrencias")
     suspend fun getOcorrencias(
-        @Header("Content-Type") contentType: String = "application/json"
+
     ): Response<OccorenciaResponse>
 
 

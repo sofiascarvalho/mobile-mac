@@ -137,7 +137,7 @@ fun OptionsScreen(navegacao: NavHostController?) {
                     }
                     Spacer(modifier = Modifier.width(50.dp))
                     Button(
-                        onClick = {},
+                        onClick = {navegacao!!.navigate("map")},
                         modifier = Modifier
                             .size(113.dp, 110.dp),
                         shape = RoundedCornerShape(5.dp),

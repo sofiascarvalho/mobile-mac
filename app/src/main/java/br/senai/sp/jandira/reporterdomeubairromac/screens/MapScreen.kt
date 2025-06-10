@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavHostController
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.maps.android.compose.Marker
@@ -22,7 +23,7 @@ private val DEFAULT_LOCATION = LatLng(-23.56847, -46.88371)
 private const val DEFAULT_ZOOM = 12f
 
 @Composable
-fun MapScreen(postViewModel: PostViewModel) {
+fun MapScreen(navegacao: NavHostController?, postViewModel: PostViewModel) {
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
