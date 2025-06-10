@@ -1,5 +1,4 @@
 package br.senai.sp.jandira.reporterdomeubairromac
-br.senai.sp.jandira.reporterdomeubairromac.BuildConfig.APPLICATION_ID
 
 
 import android.os.Bundle
@@ -16,13 +15,15 @@ import org.osmdroid.config.Configuration
 import androidx.preference.PreferenceManager
 
 
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         Configuration.getInstance().load(applicationContext, androidx.preference.PreferenceManager.getDefaultSharedPreferences(applicationContext))
 
-        Configuration.getInstance().userAgentValue = BuildConfig.APPLICATION_ID
+        Configuration.getInstance().userAgentValue = applicationContext.packageName
+
 
         // Inicializa o Firebase aqui
         FirebaseApp.initializeApp(this)
@@ -33,7 +34,7 @@ class MainActivity : ComponentActivity() {
                 val navegacao = rememberNavController()
                 NavHost(
                     navController = navegacao,
-                    startDestination = "option"
+                    startDestination = "home"
                 ) {
                     composable(route = "home") { RegisterScreen(navegacao) }
                     composable(route = "login") { LoginScreen(navegacao) }

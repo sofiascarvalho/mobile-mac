@@ -30,11 +30,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import br.senai.sp.jandira.reporterdomeubairromac.R
+import br.senai.sp.jandira.reporterdomeubairromac.viewmodel.PostViewModel
 
 @Composable
-fun HomeScreen(navegacao: NavHostController?) {
+fun HomeScreen(navegacao: NavHostController?, viewModel: PostViewModel = viewModel()) {
     Box(
         modifier = Modifier.fillMaxSize()
     ){
@@ -68,8 +70,8 @@ fun HomeScreen(navegacao: NavHostController?) {
                         modifier = Modifier
                             .size(25.dp)
                             .clickable {
+                                navegacao?.navigate("option")
                                 Log.d("NAV", "Indo para OptionScreen")
-                                navegacao!!.navigate("option")
                             }
                     )
 
@@ -95,6 +97,8 @@ fun HomeScreen(navegacao: NavHostController?) {
                         modifier = Modifier
                             .size(25.dp).clickable {
                                 navegacao?.navigate("profile")
+                                Log.d("NAV", "Indo para ProfileScreen")
+
                             }
                     )
                 }

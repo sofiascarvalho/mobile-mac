@@ -296,7 +296,9 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
                     }
                 )
                 navegacao!!.navigate("map")
-            }) {
+            },
+                colors = ButtonDefaults.buttonColors(Color(0xffc1121f))
+            ) {
                 Text("Enviar Ocorrência")
             }
             Spacer(modifier = Modifier.height(16.dp))

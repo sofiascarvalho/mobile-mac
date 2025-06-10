@@ -163,10 +163,10 @@ fun OptionsScreen(navegacao: NavHostController?) {
     }
 }
 
-
+/*
 @Preview
 @Composable
 private fun OptionsScreenPreview() {
     OptionsScreen(null)
 }
-
+*/
