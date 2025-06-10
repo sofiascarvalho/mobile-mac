@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "19805461434",
+    "project_id": "reporter-7ade4",
+    "storage_bucket": "reporter-7ade4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:19805461434:android:1e527114efa3bcc0c05b83",
+        "android_client_info": {
+          "package_name": "br.senai.sp.jandira.reporterdomeubairromac"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD7VPfCj3D7lAiUvzgSrJlRfBE2RMkgxUQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

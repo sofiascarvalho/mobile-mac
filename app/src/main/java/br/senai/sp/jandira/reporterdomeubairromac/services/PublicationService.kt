@@ -15,12 +15,15 @@ import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Header
+import retrofit2.http.Headers
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
 import java.util.Optional
 
 interface PublicationService {
+    @Headers("Content-Type: application/json")
     @POST("ocorrencias")
     suspend fun enviarOcorrencia(
         @Body ocorrencia: PostRequest
@@ -28,10 +31,14 @@ interface PublicationService {
 
     @POST("midias")
     suspend fun enviarMidia(
+        @Header("Content-Type") contentType: String = "application/json",
         @Body midia: MídiaRequest
     ): Response<Unit>
 
     @GET("ocorrencias")
-    suspend fun getOcorrencias(): Response<OccorenciaResponse>
+    suspend fun getOcorrencias(
+        @Header("Content-Type") contentType: String = "application/json"
+    ): Response<OccorenciaResponse>
+
 
 }
