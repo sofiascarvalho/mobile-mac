@@ -30,6 +30,7 @@ interface PublicationService {
     ): Response<PostCreateResponse>
 
     @POST("midias")
+    @Headers("Content-Type: application/json")
     suspend fun enviarMidia(
         @Body midia: MidiaRequest
     ): Response<Unit>

@@ -127,10 +127,15 @@ class PostViewModel : ViewModel() {
             )
 
             val response = publicationService.enviarMidia(midiaRequest)
+
             if (!response.isSuccessful) {
+                println("Erro ao enviar mídia $index")
+                println("Status Code: ${response.code()}")
+                println("Body de erro: ${response.errorBody()?.string()}")
                 onError("Falha ao enviar mídia $index")
                 throw Exception("Erro no envio de mídia")
             }
+
         }
     }
 

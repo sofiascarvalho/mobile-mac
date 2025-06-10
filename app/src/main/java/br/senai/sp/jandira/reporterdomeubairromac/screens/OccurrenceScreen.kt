@@ -295,6 +295,7 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
                         Log.d("test", erro)
                     }
                 )
+                navegacao!!.navigate("map")
             }) {
                 Text("Enviar Ocorrência")
             }
