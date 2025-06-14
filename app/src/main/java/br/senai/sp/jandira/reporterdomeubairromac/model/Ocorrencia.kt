@@ -5,5 +5,8 @@ data class Ocorrencia(
     val titulo: String,
     val descricao: String,
     val data_criacao: String,
-    val usuario: List<UsuarioResponse>
+    val usuario: User,
+    val id_categoria: Int,
+    val id_status: Int,
+    val id_endereco: Int
 )

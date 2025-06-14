@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import br.senai.sp.jandira.reporterdomeubairromac.model.MidiaRequest
+import com.google.gson.Gson
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.InputStream
@@ -87,6 +88,8 @@ class PostViewModel : ViewModel() {
                     idStatus = 1,
                     idEndereco = idEndereco
                 )
+                val json = Gson().toJson(ocorrenciaRequest)
+                Log.d("PostViewModel", "JSON enviado: $json")
 
                 val response = publicationService.enviarOcorrencia(ocorrenciaRequest)
 
@@ -113,8 +116,8 @@ class PostViewModel : ViewModel() {
 
     private suspend fun enviarMidias(
         urls: List<String>,
-        idOcorrencia: Int,  // Nome correto do parâmetro
-        idUsuario: Int,     // Nome correto do parâmetro
+        idOcorrencia: Int,
+        idUsuario: Int,
         onError: (String) -> Unit
     ) {
         urls.forEachIndexed { index, url ->
@@ -139,45 +142,45 @@ class PostViewModel : ViewModel() {
         }
     }
 
-    // Upload de imagens para Azure (versão corrigida)
-    fun uploadImagensAzure(
-        context: Context,
-        imagensUri: List<Uri>,
-        onSuccess: (List<String>) -> Unit,
-        onError: (String) -> Unit
-    ) {
-        viewModelScope.launch {
-            try {
-                val urls = mutableListOf<String>()
-                val client = OkHttpClient()
-                val blobUrlBase = "https://ocorrenciasimagens.blob.core.windows.net/imagens"
-                val sasToken = "seu_token_aqui"  // Substitua pelo token real
-
-                imagensUri.forEachIndexed { index, uri ->
-                    val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
-                        ?: throw Exception("Erro ao ler imagem")
-
-                    val fileName = "img_${System.currentTimeMillis()}_$index.jpg"
-                    val uploadUrl = "$blobUrlBase/$fileName?$sasToken"
-
-                    val request = Request.Builder()
-                        .url(uploadUrl)
-                        .put(bytes.toRequestBody("image/jpeg".toMediaTypeOrNull()))
-                        .addHeader("x-ms-blob-type", "BlockBlob")
-                        .build()
-
-                    client.newCall(request).execute().use { response ->
-                        if (!response.isSuccessful) throw Exception("Falha no upload")
-                        urls.add("$blobUrlBase/$fileName")
-                    }
-                }
-
-                onSuccess(urls)
-            } catch (e: Exception) {
-                onError("Upload falhou: ${e.message}")
-            }
-        }
-    }
+    // Upload de imagens para Azure (versão corrigida) nem estão usando a gi comentou
+//    fun uploadImagensAzure(
+//        context: Context,
+//        imagensUri: List<Uri>,
+//        onSuccess: (List<String>) -> Unit,
+//        onError: (String) -> Unit
+//    ) {
+//        viewModelScope.launch {
+//            try {
+//                val urls = mutableListOf<String>()
+//                val client = OkHttpClient()
+//                val blobUrlBase = "https://ocorrenciasimagens.blob.core.windows.net/imagens"
+//                val sasToken = "seu_token_aqui"  // Substitua pelo token real
+//
+//                imagensUri.forEachIndexed { index, uri ->
+//                    val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+//                        ?: throw Exception("Erro ao ler imagem")
+//
+//                    val fileName = "img_${System.currentTimeMillis()}_$index.jpg"
+//                    val uploadUrl = "$blobUrlBase/$fileName?$sasToken"
+//
+//                    val request = Request.Builder()
+//                        .url(uploadUrl)
+//                        .put(bytes.toRequestBody("image/jpeg".toMediaTypeOrNull()))
+//                        .addHeader("x-ms-blob-type", "BlockBlob")
+//                        .build()
+//
+//                    client.newCall(request).execute().use { response ->
+//                        if (!response.isSuccessful) throw Exception("Falha no upload")
+//                        urls.add("$blobUrlBase/$fileName")
+//                    }
+//                }
+//
+//                onSuccess(urls)
+//            } catch (e: Exception) {
+//                onError("Upload falhou: ${e.message}")
+//            }
+//        }
+//    }
 
     private fun obterIdCategoria(nomeCategoria: String): Int {
         return categorias.value.firstOrNull { it.nome_categoria == nomeCategoria }?.id_categoria

@@ -3,7 +3,6 @@ package br.senai.sp.jandira.reporterdomeubairromac.screens
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.os.Build
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -27,17 +26,17 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import br.senai.sp.jandira.reporterdomeubairromac.R
 import br.senai.sp.jandira.reporterdomeubairromac.viewmodel.LoginViewModel
+import androidx.core.content.edit
 
 @Composable
 fun LoginScreen(navegacao: NavHostController?) {
 
     val context = LocalContext.current
+    //val navController = rememberNavController()
     val loginViewModel: LoginViewModel = viewModel()
 
     val emailState = remember { mutableStateOf("") }
@@ -46,18 +45,16 @@ fun LoginScreen(navegacao: NavHostController?) {
 
     // Criar canal de notificação (necessário no Android 8+)
     LaunchedEffect(Unit) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                "LOGIN_CHANNEL_ID",
-                "Canal de Login",
-                NotificationManager.IMPORTANCE_DEFAULT
-            ).apply {
-                description = "Notificações relacionadas ao login"
-            }
-            val notificationManager =
-                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
+        val channel = NotificationChannel(
+            "LOGIN_CHANNEL_ID",
+            "Canal de Login",
+            NotificationManager.IMPORTANCE_DEFAULT
+        ).apply {
+            description = "Notificações relacionadas ao login"
         }
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -117,9 +114,13 @@ fun LoginScreen(navegacao: NavHostController?) {
                         loginViewModel.login(
                             email = emailState.value,
                             senha = senhaState.value,
+                            context = context,
                             onSuccess = { usuario ->
-                                erroState.value = ""
-                                showLoginNotification(context)
+                                val sharedPreferences = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+                                sharedPreferences.edit {
+                                    putInt("id_usuario", usuario.idUsuario)
+                                }
+                                Log.d("LOGIN", "Usuário logado com ID: ${usuario.idUsuario}")
                                 navegacao?.navigate("feed")
                             },
                             onError = { msg ->
@@ -137,44 +138,46 @@ fun LoginScreen(navegacao: NavHostController?) {
                     Text("Login", color = Color.White, fontSize = 18.sp)
                 }
 
+
                 if (erroState.value.isNotEmpty()) {
-                    Text(
-                        text = erroState.value,
-                        color = Color.Red,
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(26.dp))
-
-                Text("Don't have an account?", color = Color.White,
-                    modifier = Modifier.clickable {
-                        navegacao?.navigate("home")
-                    })
-
-                Spacer(modifier = Modifier.height(6.dp))
-
                 Text(
-                    text = "Stay disconnected",
-                    color = Color(0xffc1121f),
-                    textDecoration = TextDecoration.Underline
+                    text = erroState.value,
+                    color = Color.Red,
+                    modifier = Modifier.padding(top = 8.dp)
                 )
             }
+
+            Spacer(modifier = Modifier.height(26.dp))
+
+            Text(
+                "Don't have an account?", color = Color.White,
+                modifier = Modifier.clickable {
+                    navegacao?.navigate("home")
+                })
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            Text(
+                text = "Stay disconnected",
+                color = Color(0xffc1121f),
+                textDecoration = TextDecoration.Underline
+            )
         }
     }
 }
+}
 
 // Notificação de login
-fun showLoginNotification(context: Context) {
-    val builder = NotificationCompat.Builder(context, "LOGIN_CHANNEL_ID")
-        .setSmallIcon(android.R.drawable.ic_dialog_info)
-        .setContentTitle("Login realizado")
-        .setContentText("Bem-vindo de volta!")
-        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-        .setAutoCancel(true)
-
-    NotificationManagerCompat.from(context).notify(1001, builder.build())
-}
+//fun showLoginNotification(context: Context) {
+//    val builder = NotificationCompat.Builder(context, "LOGIN_CHANNEL_ID")
+//        .setSmallIcon(android.R.drawable.ic_dialog_info)
+//        .setContentTitle("Login realizado")
+//        .setContentText("Bem-vindo de volta!")
+//        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+//        .setAutoCancel(true)
+//
+//    NotificationManagerCompat.from(context).notify(1001, builder.build())
+//}
 
 // TextField reutilizável
 @Composable

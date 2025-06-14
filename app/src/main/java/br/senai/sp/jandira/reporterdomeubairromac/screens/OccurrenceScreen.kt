@@ -1,5 +1,6 @@
 package br.senai.sp.jandira.reporterdomeubairromac.screens
 
+import android.content.Context
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
@@ -33,11 +34,14 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = viewModel()) {
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("usuario", Context.MODE_PRIVATE)
+    val idUsuario = sharedPreferences.getInt("id_usuario", 0)
+
+    Log.d("DEBUG_ID", "ID do usuário: $idUsuario")
 
 
     val conteudo by viewModel.conteudo
-    val context = LocalContext.current
-
     var showCepDialog by remember { mutableStateOf(false) }
 
     var categoriaSelecionada by remember { mutableStateOf<Categoria?>(null) }
@@ -212,7 +216,6 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            Text(text = "Adicionar imagens", color = Color.White)
             Text(text = "URL da Imagem", color = Color.White)
             OutlinedTextField(
                 value = urlImagem,
@@ -272,18 +275,15 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
                 )
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
-
             Button(onClick = {
-
 
                 // Faz upload das imagens e publica
                 viewModel.publicar(
                     titulo = titulo,
                     categoriaSelecionada = categoriaSelecionada?.nome_categoria ?: "",
                     imagensUrl = listOf(urlImagem),
-                    idUsuario = 1,  // Ajuste conforme necessário
-                    idEndereco = 1, // Ajuste conforme necessário
+                    idUsuario = idUsuario,
+                    idEndereco = 1,
                     onSuccess = {
                         Toast.makeText(context, "Ocorrência enviada com sucesso!", Toast.LENGTH_LONG).show()
                         titulo = ""
@@ -292,16 +292,15 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
                     },
                     onError = { erro ->
                         Toast.makeText(context, erro, Toast.LENGTH_LONG).show()
-                        Log.d("test", erro)
+                        navegacao!!.navigate("occurrence")
                     }
                 )
-                navegacao!!.navigate("map")
+                navegacao!!.navigate("feed")
             },
                 colors = ButtonDefaults.buttonColors(Color(0xffc1121f))
             ) {
                 Text("Enviar Ocorrência")
             }
-            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
