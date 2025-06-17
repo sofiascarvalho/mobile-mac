@@ -1,5 +1,6 @@
 package br.senai.sp.jandira.reporterdomeubairromac.screens
 
+import android.content.Context
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
@@ -11,8 +12,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,16 +27,21 @@ import br.senai.sp.jandira.reporterdomeubairromac.R
 import br.senai.sp.jandira.reporterdomeubairromac.components.CategoriaSelectBox
 import br.senai.sp.jandira.reporterdomeubairromac.model.Categoria
 import br.senai.sp.jandira.reporterdomeubairromac.services.RetrofitViaCep
+import br.senai.sp.jandira.reporterdomeubairromac.model.EnderecoRequest
+import br.senai.sp.jandira.reporterdomeubairromac.services.EnderecoService
 import br.senai.sp.jandira.reporterdomeubairromac.viewmodel.PostViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = viewModel()) {
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("usuario", Context.MODE_PRIVATE)
+    val idUsuario = sharedPreferences.getInt("id_usuario", 0)
+
+    Log.d("DEBUG_ID", "ID do usuário: $idUsuario")
 
 
     val conteudo by viewModel.conteudo
-    val context = LocalContext.current
-
     var showCepDialog by remember { mutableStateOf(false) }
 
     var categoriaSelecionada by remember { mutableStateOf<Categoria?>(null) }
@@ -212,7 +216,6 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            Text(text = "Adicionar imagens", color = Color.White)
             Text(text = "URL da Imagem", color = Color.White)
             OutlinedTextField(
                 value = urlImagem,
@@ -271,37 +274,66 @@ fun OccurrenceScreen(navegacao: NavHostController?, viewModel: PostViewModel = v
                     }
                 )
             }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Button(onClick = {
-
-
-                // Faz upload das imagens e publica
-                viewModel.publicar(
-                    titulo = titulo,
-                    categoriaSelecionada = categoriaSelecionada?.nome_categoria ?: "",
-                    imagensUrl = listOf(urlImagem),
-                    idUsuario = 1,  // Ajuste conforme necessário
-                    idEndereco = 1, // Ajuste conforme necessário
-                    onSuccess = {
-                        Toast.makeText(context, "Ocorrência enviada com sucesso!", Toast.LENGTH_LONG).show()
-                        titulo = ""
-                        categoriaSelecionada = null
-                        urlImagem = ""
-                    },
-                    onError = { erro ->
-                        Toast.makeText(context, erro, Toast.LENGTH_LONG).show()
-                        Log.d("test", erro)
-                    }
-                )
-                navegacao!!.navigate("map")
-            },
-                colors = ButtonDefaults.buttonColors(Color(0xffc1121f))
-            ) {
-                Text("Enviar Ocorrência")
-            }
-            Spacer(modifier = Modifier.height(16.dp))
+//            Button(
+//                onClick = {
+//                    coroutineScope.launch {
+//                        try {
+//                            val enderecoRequest = EnderecoRequest(
+//                                logradouro = endereco.logradouro,
+//                                bairro = cepResponse.bairro,
+//                                cidade = cepResponse.localidade,
+//                                estado = cepResponse.uf,
+//                                cep = cepResponse.cep,
+//                                latitude = null,
+//                                longitude = null
+//                            )
+//
+//                            val response = RetrofitViaCep.service.buscarCep(cep)
+//                            val endereco = response.body()
+//
+//                            if (response.isSuccessful) {
+//                                val endereco = response.body()?.result?.firstOrNull()
+//
+//                                if (endereco != null) {
+//                                    val idEndereco = endereco.id_endereco
+//
+//                                    // 3. Publica a ocorrência com o ID do endereço real
+//                                    viewModel.publicar(
+//                                        titulo = titulo,
+//                                        categoriaSelecionada = categoriaSelecionada?.nome_categoria ?: "",
+//                                        imagensUrl = listOf(urlImagem),
+//                                        idUsuario = idUsuario,
+//                                        idEndereco = idEndereco,
+//                                        onSuccess = {
+//                                            Toast.makeText(context, "Ocorrência enviada com sucesso!", Toast.LENGTH_LONG).show()
+//                                            titulo = ""
+//                                            categoriaSelecionada = null
+//                                            urlImagem = ""
+//                                        },
+//                                        onError = { erro ->
+//                                            Toast.makeText(context, erro, Toast.LENGTH_LONG).show()
+//                                            navegacao?.navigate("occurrence")
+//                                        }
+//                                    )
+//
+//                                    navegacao?.navigate("feed")
+//
+//                                } else {
+//                                    Toast.makeText(context, "Endereço inválido.", Toast.LENGTH_LONG).show()
+//                                }
+//                            } else {
+//                                Toast.makeText(context, "Erro ao cadastrar endereço", Toast.LENGTH_LONG).show()
+//                            }
+//
+//                        } catch (e: Exception) {
+//                            Toast.makeText(context, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
+//                        }
+//                    }
+//                },
+//                colors = ButtonDefaults.buttonColors(Color(0xffc1121f))
+//            ) {
+//                Text("Enviar Ocorrência")
+//            }
         }
     }
 }

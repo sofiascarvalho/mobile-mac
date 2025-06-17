@@ -41,7 +41,7 @@ class MainActivity : ComponentActivity() {
                     composable(route = "feed") { HomeScreen(navegacao) }
                     composable(route = "option") { OptionsScreen(navegacao) }
                     composable(route = "occurrence") { OccurrenceScreen(navegacao) }
-                    composable(route = "map") { OpenStreetMapScreen(navegacao) }
+//                    composable(route = "map") { OpenStreetMapScreen(navegacao) }
                     composable(route = "profile") { ProfileScreen(navegacao) }
                 }
             }
