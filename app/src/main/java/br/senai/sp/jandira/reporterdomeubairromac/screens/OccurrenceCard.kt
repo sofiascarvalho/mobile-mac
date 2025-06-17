@@ -1,4 +1,4 @@
-package br.senai.sp.jandira.reporterdomeubairromac.screens
+package br.senai.sp.jandira.reporterdomeubairromac.screens // Ajuste o pacote se for diferente
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -27,10 +27,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import br.senai.sp.jandira.reporterdomeubairromac.model.Categoria
 
 @Composable
-fun OccurrenceCard(
+fun OccurrenceCard( // Se o nome da sua função é OcorrenciaCard, mantenha.
     titulo: String = "Titulo da Ocorrência - ",
     descricao: String = "Descrição da Ocorrência",
     nome_status: String = "Status",
@@ -75,49 +74,54 @@ fun OccurrenceCard(
                 .height(200.dp)
                 .background(Color.Black)
         ) {
-
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(15.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.FavoriteBorder,
-                contentDescription = "",
-                tint = Color(0xFF000000)
-            )
-            Icon(
-                imageVector = Icons.Default.Chat,
-                contentDescription = "",
-                tint = Color(0xFF000000)
-            )
-        }
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 15.dp)
-        ){
-            Row {
-                Text(text = titulo,
-                    color = androidx.compose.ui.graphics.Color.Black,
-                    fontWeight = FontWeight.Black,
-                    fontSize = 17.sp)
-                Text(text = nome_categoria,
-                    color = androidx.compose.ui.graphics.Color.Black,
-                    fontWeight = FontWeight.Black,
-                    fontSize = 17.sp)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(15.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.FavoriteBorder,
+                    contentDescription = "",
+                    tint = Color(0xFF000000)
+                )
+                Icon(
+                    imageVector = Icons.Default.Chat,
+                    contentDescription = "",
+                    tint = Color(0xFF000000)
+                )
             }
-            Text(text = descricao,
-                color = androidx.compose.ui.graphics.Color.Black,
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 15.dp)
+            ) {
+                Row {
+                    Text(
+                        text = titulo,
+                        color = androidx.compose.ui.graphics.Color.Black,
+                        fontWeight = FontWeight.Black,
+                        fontSize = 17.sp
+                    )
+                    Text(
+                        text = nome_categoria,
+                        color = androidx.compose.ui.graphics.Color.Black,
+                        fontWeight = FontWeight.Black,
+                        fontSize = 17.sp
+                    )
+                }
+                Text(
+                    text = descricao,
+                    color = androidx.compose.ui.graphics.Color.Black,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
     }
 }
 
 @Preview(showSystemUi = true)
 @Composable
-fun OccurrenceCardPreview() {
+fun OcorrenciaCardPreview() {
     OccurrenceCard()
 }

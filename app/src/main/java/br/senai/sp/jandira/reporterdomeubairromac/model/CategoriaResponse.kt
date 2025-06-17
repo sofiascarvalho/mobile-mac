@@ -1,5 +1,5 @@
 package br.senai.sp.jandira.reporterdomeubairromac.model
 
-data class CategoriaRespose(
+data class CategoriaResponse(
     val categorias:List<Categoria>
 )

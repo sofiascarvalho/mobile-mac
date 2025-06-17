@@ -18,7 +18,13 @@ object RetrofitFactory {
     val categoriaService: CategoriaService = retrofitFactory.create(CategoriaService::class.java)
     val enderecoService: EnderecoService = retrofitFactory.create(EnderecoService::class.java)
 
+    fun getOccurrenceService(): PublicationService{
+        return retrofitFactory
+            .create(PublicationService::class.java)
+    }
 }
+
+
 
 object RetrofitViaCep {
     private val retrofit = Retrofit
