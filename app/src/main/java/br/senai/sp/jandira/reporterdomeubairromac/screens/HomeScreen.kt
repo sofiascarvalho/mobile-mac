@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -106,14 +107,29 @@ fun HomeScreen(navegacao: NavHostController?, viewModel: PostViewModel = viewMod
                     }
             )
         }
+        Box(
+            modifier = Modifier
+                .padding(top = 100.dp)
+                .fillMaxSize()
+        ){
+            Spacer(modifier = Modifier.height(16.dp))
+            LazyColumn {
+                items(characterList.value){
+                    OccurrenceCard(
+                        nome = it.nome
+                    )
+                }
+            OccurrenceCard()
+            OccurrenceCard()
+        }
     }
 }
 
-//@Preview(showSystemUi = true)
-//@Composable
-//fun PreviewHomeScreen() {
-//    HomeScreen(null)
-//}
+@Preview(showSystemUi = true)
+@Composable
+fun PreviewHomeScreen() {
+    HomeScreen(null)
+}
 
 
 

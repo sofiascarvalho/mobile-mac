@@ -37,7 +37,6 @@ interface PublicationService {
 
     @GET("ocorrencias")
     suspend fun getOcorrencias(
-
     ): Response<OccorenciaResponse>
 
 
